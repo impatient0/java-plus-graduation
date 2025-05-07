@@ -1,7 +1,10 @@
 package ru.practicum.explorewithme.stats.dto;
 
+import lombok.Data;
+
+@Data
 public class ViewStatsDto {
-
-    // TODO: view stats DTO
-
+    private String app;
+    private String uri;
+    private Long hits;
 }
