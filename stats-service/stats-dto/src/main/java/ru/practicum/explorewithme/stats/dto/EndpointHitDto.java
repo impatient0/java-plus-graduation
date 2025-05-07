@@ -1,6 +1,7 @@
 package ru.practicum.explorewithme.stats.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.PastOrPresent;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,6 +27,7 @@ public class EndpointHitDto {
     private String ip;
 
     @NotNull(message = "Поле timestamp не может быть пустым")
+    @PastOrPresent(message = "Поле timestamp должно быть не позже текущей даты и времени")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime timestamp;
 }
