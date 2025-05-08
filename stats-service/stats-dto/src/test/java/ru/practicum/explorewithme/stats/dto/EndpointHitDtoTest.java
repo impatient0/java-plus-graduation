@@ -25,7 +25,6 @@ class EndpointHitDtoTest {
         // Подготовка тестовых данных
         LocalDateTime timestamp = LocalDateTime.of(2024, 3, 15, 12, 30, 0);
         EndpointHitDto dto = new EndpointHitDto(
-                1L,
                 "test-app",
                 "/test/path",
                 "192.168.1.1",
@@ -36,7 +35,6 @@ class EndpointHitDtoTest {
         String json = objectMapper.writeValueAsString(dto);
 
         // Проверки
-        assertTrue(json.contains("\"id\":1"));
         assertTrue(json.contains("\"app\":\"test-app\""));
         assertTrue(json.contains("\"uri\":\"/test/path\""));
         assertTrue(json.contains("\"ip\":\"192.168.1.1\""));
@@ -48,7 +46,6 @@ class EndpointHitDtoTest {
         // Подготовка JSON
         String json = """
                 {
-                    "id": 1,
                     "app": "test-app",
                     "uri": "/test/path",
                     "ip": "192.168.1.1",
@@ -59,7 +56,6 @@ class EndpointHitDtoTest {
         EndpointHitDto dto = objectMapper.readValue(json, EndpointHitDto.class);
 
         // Проверки
-        assertEquals(1L, dto.getId());
         assertEquals("test-app", dto.getApp());
         assertEquals("/test/path", dto.getUri());
         assertEquals("192.168.1.1", dto.getIp());
@@ -90,7 +86,7 @@ class EndpointHitDtoTest {
     @Test
     void testNullValues() throws Exception {
         // Создание объекта с null-значениями
-        EndpointHitDto dto = new EndpointHitDto(null, null, null, null, null);
+        EndpointHitDto dto = new EndpointHitDto(null, null, null, null);
 
         // Сериализация
         String json = objectMapper.writeValueAsString(dto);
@@ -99,7 +95,6 @@ class EndpointHitDtoTest {
         EndpointHitDto deserializedDto = objectMapper.readValue(json, EndpointHitDto.class);
 
         // Проверки
-        assertNull(deserializedDto.getId());
         assertNull(deserializedDto.getApp());
         assertNull(deserializedDto.getUri());
         assertNull(deserializedDto.getIp());
