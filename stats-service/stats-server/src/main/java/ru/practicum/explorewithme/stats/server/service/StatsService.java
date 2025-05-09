@@ -12,7 +12,7 @@ public interface StatsService {
      * Сохраняет информацию о запросе к эндпоинту.
      *
      * @param endpointHitDto DTO с информацией о запросе.
-     */
+     **/
     void saveHit(EndpointHitDto endpointHitDto);
 
     /**

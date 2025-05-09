@@ -37,7 +37,7 @@ public class StatsController {
     public void saveHit(@Valid @RequestBody EndpointHitDto endpointHitDto) {
         log.info("Controller: request to save new hit received.");
         log.debug("Saving new hit: {}", endpointHitDto);
-        statsService.saveHit(endpointHitDto); // Calls the stubbed service method
+        statsService.saveHit(endpointHitDto);
     }
 
     /**
