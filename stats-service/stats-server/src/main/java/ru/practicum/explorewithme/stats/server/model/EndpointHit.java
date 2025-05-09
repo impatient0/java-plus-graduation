@@ -1,4 +1,4 @@
-package ru.practicum.exporewithme.stats.server.model;
+package ru.practicum.explorewithme.stats.server.model;
 
 public class EndpointHit {
 
