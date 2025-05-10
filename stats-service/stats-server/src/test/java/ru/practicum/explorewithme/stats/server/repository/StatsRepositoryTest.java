@@ -99,6 +99,7 @@ public class StatsRepositoryTest {
             LocalDateTime start = now.minusHours(3);
             LocalDateTime end = now.plusHours(1);
 
+            // На уровне сервиса пустой список URI должен быть явно преобразован в null
             List<ViewStatsDto> result = statsRepository.findStats(start, end, null); // URI не указаны
 
             assertThat(result).hasSize(3); // Ожидаем статистику для трех уникальных URI: /uri1, /uri2, /uri3
@@ -152,6 +153,7 @@ public class StatsRepositoryTest {
             LocalDateTime start = now.minusHours(3);
             LocalDateTime end = now.plusHours(1);
 
+            // На уровне сервиса пустой список URI должен быть явно преобразован в null
             List<ViewStatsDto> result = statsRepository.findUniqueStats(start, end, null); // URI не указаны
 
             assertThat(result).hasSize(3); // Ожидаем статистику для трех уникальных URI
