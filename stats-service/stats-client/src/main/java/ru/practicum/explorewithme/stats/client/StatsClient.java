@@ -1,7 +1,13 @@
 package ru.practicum.explorewithme.stats.client;
 
-public class StatsClient {
+import ru.practicum.explorewithme.stats.dto.EndpointHitDto;
+import ru.practicum.explorewithme.stats.dto.ViewStatsDto;
 
-    // TODO: stats client
+import java.time.LocalDateTime;
+import java.util.List;
 
+public interface StatsClient {
+    void saveHit(EndpointHitDto endpointHitDto);
+
+    List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique);
 }
