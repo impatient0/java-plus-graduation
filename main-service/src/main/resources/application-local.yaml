@@ -1,0 +1,8 @@
+stats-server:
+  url: http://localhost:9090
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ewm_main_db
+    username: emw_user
+    password: emw_password
