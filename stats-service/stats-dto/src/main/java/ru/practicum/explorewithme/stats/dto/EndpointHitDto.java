@@ -1,5 +1,7 @@
 package ru.practicum.explorewithme.stats.dto;
 
+import static ru.practicum.explorewithme.common.constants.DateTimeConstants.DATE_TIME_FORMAT_PATTERN;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.NotBlank;
@@ -36,6 +38,6 @@ public class EndpointHitDto {
 
     @NotNull(message = "Поле timestamp не может быть пустым")
     @PastOrPresent(message = "Поле timestamp должно быть не позже текущей даты и времени")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT_PATTERN)
     private LocalDateTime timestamp;
 }

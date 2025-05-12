@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static ru.practicum.explorewithme.common.constants.DateTimeConstants.DATE_TIME_FORMAT_PATTERN;
 
 @DisplayName("Тесты для EndpointHitDto")
 class EndpointHitDtoTest {
@@ -71,7 +72,7 @@ class EndpointHitDtoTest {
                     .contains("\"ip\":\"192.168.1.1\"");
 
             assertThat(json)
-                    .as("JSON должен содержать поле timestamp в формате yyyy-MM-dd HH:mm:ss")
+                    .as("JSON должен содержать поле timestamp в формате " + DATE_TIME_FORMAT_PATTERN)
                     .contains("\"timestamp\":\"2024-03-15 12:30:00\"");
         }
 

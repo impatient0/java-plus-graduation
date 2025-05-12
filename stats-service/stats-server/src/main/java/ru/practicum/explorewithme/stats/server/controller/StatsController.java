@@ -1,5 +1,7 @@
 package ru.practicum.explorewithme.stats.server.controller;
 
+import static ru.practicum.explorewithme.common.constants.DateTimeConstants.DATE_TIME_FORMAT_PATTERN;
+
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -53,11 +55,11 @@ public class StatsController {
     @ResponseStatus(HttpStatus.OK)
     public List<ViewStatsDto> getStats(
         @RequestParam(name = "start")
-        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        @DateTimeFormat(pattern = DATE_TIME_FORMAT_PATTERN)
         LocalDateTime start,
 
         @RequestParam(name = "end")
-        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        @DateTimeFormat(pattern = DATE_TIME_FORMAT_PATTERN)
         LocalDateTime end,
 
         @RequestParam(name = "uris", required = false) List<String> uris,

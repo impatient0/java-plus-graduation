@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static ru.practicum.explorewithme.common.constants.DateTimeConstants.DATE_TIME_FORMATTER;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
@@ -41,7 +42,7 @@ public class StatsServerIntegrationTest {
     @Autowired
     private TestRestTemplate restTemplate;
 
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter FORMATTER = DATE_TIME_FORMATTER;
     private final LocalDateTime now = LocalDateTime.now();
 
     @BeforeAll

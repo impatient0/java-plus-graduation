@@ -1,5 +1,9 @@
 package ru.practicum.explorewithme.stats.client;
 
+import static ru.practicum.explorewithme.common.constants.DateTimeConstants.DATE_TIME_FORMATTER;
+
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -10,10 +14,6 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import ru.practicum.explorewithme.stats.dto.EndpointHitDto;
 import ru.practicum.explorewithme.stats.dto.ViewStatsDto;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 @Service
 @Slf4j
@@ -64,9 +64,9 @@ public class StatsClientImpl implements StatsClient {
                 .uri(uriBuilder -> {
                     uriBuilder.path("/stats")
                             .queryParam("start", start
-                                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                                    .format(DATE_TIME_FORMATTER))
                             .queryParam("end", end
-                                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                                    .format(DATE_TIME_FORMATTER));
 
                     if (uris != null && !uris.isEmpty()) {
                         for (String uri : uris) {

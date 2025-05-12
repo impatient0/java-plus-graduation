@@ -1,5 +1,22 @@
 package ru.practicum.explorewithme.stats.client;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+import static ru.practicum.explorewithme.common.constants.DateTimeConstants.DATE_TIME_FORMATTER;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -14,17 +31,6 @@ import org.springframework.web.client.RestTemplate;
 import ru.practicum.explorewithme.stats.dto.EndpointHitDto;
 import ru.practicum.explorewithme.stats.dto.ViewStatsDto;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
-
 @DisplayName("Тесты для StatsClientImpl")
 class StatsClientTest {
 
@@ -32,7 +38,7 @@ class StatsClientTest {
     private MockRestServiceServer mockServer;
     private StatsClientImpl statsClient;
     private final String baseUrl = "http://stats-server:9090";
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter FORMATTER = DATE_TIME_FORMATTER;
 
     @BeforeEach
     void setUp() {
