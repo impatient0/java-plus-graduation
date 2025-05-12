@@ -1,6 +1,7 @@
 package ru.practicum.explorewithme.stats.server.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -24,6 +25,7 @@ import ru.practicum.explorewithme.stats.server.service.StatsService;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,7 +51,7 @@ class StatsControllerTest {
         mvc = MockMvcBuilders
                 .standaloneSetup(statsController)
                 .build();
-        now = LocalDateTime.now();
+        now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         validHitDto = EndpointHitDto.builder()
                 .app("test-app")
                 .uri("/test-uri")
@@ -142,5 +144,22 @@ class StatsControllerTest {
         verify(statsService, times(1)).getStats(eq(start), eq(end), eq(uris), eq(unique));
     }
 
+    @Test
+    void getStats_whenNoUris_shouldReturn200Ok() throws Exception {
+        LocalDateTime start = now.minusDays(1);
+        LocalDateTime end = now;
+        Boolean unique = false;
 
+        List<ViewStatsDto> statsList = List.of(new ViewStatsDto("test-app", "/", 5L));
+        when(statsService.getStats(eq(start), eq(end), isNull(), eq(unique))).thenReturn(statsList);
+
+        mvc.perform(get("/stats")
+                        .param("start", start.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                        .param("end", end.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                        .param("unique", String.valueOf(unique)))
+                .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(statsList)));
+
+        verify(statsService, times(1)).getStats(eq(start), eq(end), isNull(), eq(unique));
+    }
 }
