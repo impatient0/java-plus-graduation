@@ -10,10 +10,8 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
-import static ru.practicum.explorewithme.common.constants.DateTimeConstants.DATE_TIME_FORMATTER;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -38,7 +36,6 @@ class StatsClientTest {
     private MockRestServiceServer mockServer;
     private StatsClientImpl statsClient;
     private final String baseUrl = "http://stats-server:9090";
-    private static final DateTimeFormatter FORMATTER = DATE_TIME_FORMATTER;
 
     @BeforeEach
     void setUp() {

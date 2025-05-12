@@ -1,6 +1,10 @@
 package ru.practicum.explorewithme.stats.server.controller;
 
-import org.junit.jupiter.api.BeforeAll;
+import static org.assertj.core.api.Assertions.assertThat;
+import static ru.practicum.explorewithme.common.constants.DateTimeConstants.DATE_TIME_FORMATTER;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,12 +18,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.practicum.explorewithme.stats.dto.EndpointHitDto;
 import ru.practicum.explorewithme.stats.dto.ViewStatsDto;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static ru.practicum.explorewithme.common.constants.DateTimeConstants.DATE_TIME_FORMATTER;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
@@ -44,11 +42,6 @@ public class StatsServerIntegrationTest {
 
     private static final DateTimeFormatter FORMATTER = DATE_TIME_FORMATTER;
     private final LocalDateTime now = LocalDateTime.now();
-
-    @BeforeAll
-    static void setUpContainer() {
-        postgresqlContainer.start();
-    }
 
     @Test
     void shouldRetrieveUniqueStats_whenUniqueFlagIsTrue() {
