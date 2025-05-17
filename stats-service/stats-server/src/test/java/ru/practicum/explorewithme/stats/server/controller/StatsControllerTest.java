@@ -42,6 +42,7 @@ class StatsControllerTest {
     private EndpointHitDto validHitDto;
     private LocalDateTime now;
     private ObjectMapper objectMapper;
+    private DateTimeFormatter dateTimeFormatter;
 
     @BeforeEach
     void setUp() {
@@ -58,6 +59,7 @@ class StatsControllerTest {
                 .ip("127.0.0.1")
                 .timestamp(now.minusHours(1))
                 .build();
+        dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     }
 
     @Test
@@ -75,7 +77,7 @@ class StatsControllerTest {
 
     @Test
     void saveHitShouldReturn400WhenAppIsBlank() throws Exception {
-        validHitDto.setIp("");
+        validHitDto.setApp("");
 
         mvc.perform(post("/hit")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -132,8 +134,8 @@ class StatsControllerTest {
                 .thenReturn(List.of(new ViewStatsDto("test-app", "/test-uri", 10L)));
 
         mvc.perform(get("/stats")
-                        .param("start", start.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
-                        .param("end", end.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                        .param("start", start.format(dateTimeFormatter))
+                        .param("end", end.format(dateTimeFormatter))
                         .param("uris", "/test-uri")
                         .param("unique", String.valueOf(unique)))
                 .andExpect(status().isOk())
@@ -154,8 +156,8 @@ class StatsControllerTest {
         when(statsService.getStats(eq(start), eq(end), isNull(), eq(unique))).thenReturn(statsList);
 
         mvc.perform(get("/stats")
-                        .param("start", start.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
-                        .param("end", end.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                        .param("start", start.format(dateTimeFormatter))
+                        .param("end", end.format(dateTimeFormatter))
                         .param("unique", String.valueOf(unique)))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(statsList)));
