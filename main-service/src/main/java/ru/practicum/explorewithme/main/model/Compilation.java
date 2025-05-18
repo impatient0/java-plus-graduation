@@ -28,8 +28,7 @@ public class Compilation {
      * Флаг, закреплена ли подборка на главной странице.
      */
     @Column(name = "pinned", nullable = false)
-    @Builder.Default
-    private boolean pinned = false;
+    private boolean pinned;
 
     /**
      * Название подборки.
@@ -41,11 +40,11 @@ public class Compilation {
      * События, входящие в подборку.
      */
     @ManyToMany(fetch = FetchType.LAZY)
+    @Builder.Default
     @JoinTable(
             name = "compilation_events",
             joinColumns = @JoinColumn(name = "compilation_id"),
             inverseJoinColumns = @JoinColumn(name = "event_id")
     )
-    @Builder.Default
     private Set<Event> events = new HashSet<>();
 }
