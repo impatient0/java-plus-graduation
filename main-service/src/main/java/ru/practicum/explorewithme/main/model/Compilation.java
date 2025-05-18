@@ -28,6 +28,7 @@ public class Compilation {
      * Флаг, закреплена ли подборка на главной странице.
      */
     @Column(name = "pinned", nullable = false)
+    @Builder.Default
     private boolean pinned = false;
 
     /**
@@ -45,5 +46,6 @@ public class Compilation {
             joinColumns = @JoinColumn(name = "compilation_id"),
             inverseJoinColumns = @JoinColumn(name = "event_id")
     )
+    @Builder.Default
     private Set<Event> events = new HashSet<>();
 }
