@@ -1,5 +1,6 @@
 package ru.practicum.explorewithme.main.service;
 
+import jakarta.validation.constraints.Positive;
 import ru.practicum.explorewithme.main.dto.ParticipationRequestDto;
 
 import java.util.List;
@@ -11,5 +12,7 @@ public interface RequestService {
     List<ParticipationRequestDto> getRequests(Long userId);
 
     ParticipationRequestDto cancelRequest(Long userId, Long requestId);
+
+    List<ParticipationRequestDto> getEventRequests(@Positive Long userId, @Positive Long eventId);
 
 }

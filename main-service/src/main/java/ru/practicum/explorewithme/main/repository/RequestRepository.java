@@ -2,6 +2,7 @@ package ru.practicum.explorewithme.main.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import ru.practicum.explorewithme.main.dto.ParticipationRequestDto;
 import ru.practicum.explorewithme.main.model.ParticipationRequest;
 import ru.practicum.explorewithme.main.model.RequestStatus;
 
@@ -19,4 +20,5 @@ public interface RequestRepository extends JpaRepository<ParticipationRequest, L
 
     Optional<ParticipationRequest> findByIdAndRequester_Id(Long requestId, Long userId);
 
+    List<ParticipationRequest> findByEvent_Id(Long eventId);
 }
