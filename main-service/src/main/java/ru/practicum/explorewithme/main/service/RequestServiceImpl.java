@@ -45,7 +45,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ParticipationRequestDto> getRequests(Long userId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User", "Id", userId));
@@ -56,7 +56,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId) {
         if (!eventRepository.existsByIdAndInitiator_Id(eventId, userId))
             throw new EntityNotFoundException("Event with Id = " + eventId + " when initiator", "Id", userId);
