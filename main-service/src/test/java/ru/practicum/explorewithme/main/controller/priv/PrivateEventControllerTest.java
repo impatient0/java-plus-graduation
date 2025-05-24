@@ -51,7 +51,6 @@ class PrivateEventControllerTest {
     @MockitoBean
     private RequestService requestService;
 
-
     private final Long testUserId = 1L;
     private final DateTimeFormatter formatter = DATE_TIME_FORMATTER;
 

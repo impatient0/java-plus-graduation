@@ -8,15 +8,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explorewithme.main.dto.EventFullDto;
+import ru.practicum.explorewithme.main.dto.EventRequestStatusUpdateRequestDto;
+import ru.practicum.explorewithme.main.dto.EventRequestStatusUpdateResultDto;
 import ru.practicum.explorewithme.main.dto.EventShortDto;
 import ru.practicum.explorewithme.main.dto.NewEventDto;
 import ru.practicum.explorewithme.main.dto.UpdateEventUserRequestDto;
 import ru.practicum.explorewithme.main.dto.ParticipationRequestDto;
 import ru.practicum.explorewithme.main.service.EventService;
 import ru.practicum.explorewithme.main.service.RequestService;
+import ru.practicum.explorewithme.main.service.params.EventRequestStatusUpdateRequestParams;
 
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
+import ru.practicum.explorewithme.main.service.params.EventRequestStatusUpdateRequestParams;
+
 import java.util.List;
 
 @RestController
@@ -129,6 +134,23 @@ public class PrivateEventController {
     }
 
 
-    // TODO: PATCH /users/{userId}/events/{eventId}/requests - Изменение статуса заявок (подтверждение/отклонение) (EventRequestStatusUpdateRequest -> EventRequestStatusUpdateResult)
-    // (Задача: PRIVATE-EVENTS: Изменение статуса заявок (подтверждение/отклонение))
+    @PatchMapping("/{eventId}/requests")
+    @ResponseStatus(HttpStatus.OK)
+    public EventRequestStatusUpdateResultDto updateRequestsStatus(
+            @PathVariable @Positive Long userId,
+            @PathVariable @Positive Long eventId,
+            @Valid @RequestBody EventRequestStatusUpdateRequestDto requestStatusUpdate) {
+        log.info("Private: Received request to change status requests {} for event {} when initiator {}",
+                requestStatusUpdate.getRequestIds(), eventId, userId);
+        EventRequestStatusUpdateRequestParams requestParams = EventRequestStatusUpdateRequestParams.builder()
+                .userId(userId)
+                .eventId(eventId)
+                .requestIds(requestStatusUpdate.getRequestIds())
+                .status(requestStatusUpdate.getStatus())
+                .build();
+        EventRequestStatusUpdateResultDto result = requestService.updateRequestsStatus(requestParams);
+        log.info("Private: Received list requests for event {} when initiator {} : {}", eventId, userId, result);
+        return result;
+    }
+
 }
