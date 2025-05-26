@@ -8,6 +8,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.explorewithme.main.aspect.LogStatsHit;
 import ru.practicum.explorewithme.main.dto.EventFullDto;
 import ru.practicum.explorewithme.main.dto.EventShortDto;
 import ru.practicum.explorewithme.main.service.EventService;
@@ -29,6 +30,7 @@ public class PublicEventController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
+    @LogStatsHit
     public List<EventShortDto> getEvents(
             @RequestParam(name = "text", required = false) String text,
             @RequestParam(name = "categories", required = false) List<Long> categories,
@@ -57,18 +59,19 @@ public class PublicEventController {
                 .sort(sort)
                 .build();
 
-        List<EventShortDto> events = eventService.getEventsPublic(params, from, size, ipAddress);
+        List<EventShortDto> events = eventService.getEventsPublic(params, from, size);
         log.info("Public: Found {} events", events.size());
         return events;
     }
 
     @GetMapping("/{eventId}")
     @ResponseStatus(HttpStatus.OK)
+    @LogStatsHit
     public EventFullDto getEventById(
             @PathVariable @Positive Long eventId,
             @RequestHeader(name = "X-Real-IP", required = false) String ipAddress) {
         log.info("Public: Received request to get event with id={}", eventId);
-        EventFullDto event = eventService.getEventByIdPublic(eventId, ipAddress);
+        EventFullDto event = eventService.getEventByIdPublic(eventId);
         log.info("Public: Found event: {}", event);
         return event;
     }

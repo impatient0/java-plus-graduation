@@ -5,8 +5,13 @@ import com.querydsl.core.BooleanBuilder;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -27,12 +32,16 @@ import ru.practicum.explorewithme.main.model.Category;
 import ru.practicum.explorewithme.main.model.Event;
 import ru.practicum.explorewithme.main.model.EventState;
 import ru.practicum.explorewithme.main.model.QEvent;
+import ru.practicum.explorewithme.main.model.RequestStatus;
 import ru.practicum.explorewithme.main.model.User;
 import ru.practicum.explorewithme.main.repository.CategoryRepository;
 import ru.practicum.explorewithme.main.repository.EventRepository;
+import ru.practicum.explorewithme.main.repository.RequestRepository;
 import ru.practicum.explorewithme.main.repository.UserRepository;
 import ru.practicum.explorewithme.main.service.params.AdminEventSearchParams;
 import ru.practicum.explorewithme.main.service.params.PublicEventSearchParams;
+import ru.practicum.explorewithme.stats.client.StatsClient;
+import ru.practicum.explorewithme.stats.dto.ViewStatsDto;
 
 @Service
 @RequiredArgsConstructor
@@ -44,13 +53,15 @@ public class EventServiceImpl implements EventService {
     private final EventMapper eventMapper;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final RequestRepository requestRepository;
+    private final StatsClient statsClient;
 
     private static final long MIN_HOURS_BEFORE_PUBLICATION_FOR_ADMIN = 1;
 
     @Override
     @Transactional(readOnly = true)
-    public List<EventShortDto> getEventsPublic(PublicEventSearchParams params, int from, int size, String ipAddress) {
-        log.debug("Public search for events with params: {}", params);
+    public List<EventShortDto> getEventsPublic(PublicEventSearchParams params, int from, int size) {
+        log.info("Public search for events with params: {}, from={}, size={}", params, from, size);
 
         String text = params.getText();
         List<Long> categories = params.getCategories();
@@ -61,19 +72,18 @@ public class EventServiceImpl implements EventService {
         String sort = params.getSort();
 
         if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
-            throw new IllegalArgumentException("rangeStart cannot be after rangeEnd.");
+            throw new IllegalArgumentException("Validation Error: rangeStart cannot be after rangeEnd.");
         }
 
         QEvent qEvent = QEvent.event;
         BooleanBuilder predicate = new BooleanBuilder();
 
-        // Только опубликованные события
         predicate.and(qEvent.state.eq(EventState.PUBLISHED));
 
         if (text != null && !text.isBlank()) {
             String searchText = text.toLowerCase();
-            predicate.and(qEvent.annotation.lower().contains(searchText)
-                    .or(qEvent.description.lower().contains(searchText)));
+            predicate.and(qEvent.annotation.lower().like("%" + searchText + "%")
+                .or(qEvent.description.lower().like("%" + searchText + "%")));
         }
 
         if (categories != null && !categories.isEmpty()) {
@@ -84,55 +94,102 @@ public class EventServiceImpl implements EventService {
             predicate.and(qEvent.paid.eq(paid));
         }
 
-        if (rangeStart != null) {
-            predicate.and(qEvent.eventDate.goe(rangeStart));
+        if (rangeStart == null && rangeEnd == null) {
+            predicate.and(qEvent.eventDate.after(LocalDateTime.now()));
         } else {
-            predicate.and(qEvent.eventDate.goe(LocalDateTime.now()));
+            if (rangeStart != null) {
+                predicate.and(qEvent.eventDate.goe(rangeStart));
+            }
+            if (rangeEnd != null) {
+                predicate.and(qEvent.eventDate.loe(rangeEnd));
+            }
         }
 
-        if (rangeEnd != null) {
-            predicate.and(qEvent.eventDate.loe(rangeEnd));
-        }
-
-        if (onlyAvailable) {
-            // Заглушка: проверка на доступность (participantLimit > confirmedRequests)
-            predicate.and(qEvent.participantLimit.eq(0));
-        }
-
-        Sort sortOption = sort != null && sort.equals("VIEWS") ?
-                Sort.by(Sort.Direction.DESC, "views") :
-                Sort.by(Sort.Direction.ASC, "eventDate");
+        Sort sortOption = Sort.by(Sort.Direction.ASC, "eventDate");
 
         Pageable pageable = PageRequest.of(from / size, size, sortOption);
 
-        Page<Event> eventPage = eventRepository.findAll(predicate, pageable);
+        Page<Event> eventPage = eventRepository.findAll(predicate.getValue(), pageable);
 
         if (eventPage.isEmpty()) {
             return Collections.emptyList();
         }
 
-        // TODO: Реализовать логику учета просмотров через ipAddress (StatsClient)
-        List<EventShortDto> result = eventMapper.toEventShortDtoList(eventPage.getContent());
-        log.debug("Public search found {} events", result.size());
-        return result;
+        List<Event> foundEvents = eventPage.getContent();
+
+        Map<Long, Long> viewsMap = getViewsForEvents(foundEvents);
+
+        Map<Long, Event> eventMapById = foundEvents.stream()
+            .collect(Collectors.toMap(Event::getId, e -> e));
+
+        List<EventShortDto> eventDtos = foundEvents.stream()
+            .map(event -> {
+                EventShortDto dto = eventMapper.toEventShortDto(event);
+                dto.setViews(viewsMap.getOrDefault(event.getId(), 0L));
+                return dto;
+            })
+            .collect(Collectors.toList());
+
+        if (onlyAvailable) {
+            eventDtos = eventDtos.stream()
+                .filter(dto -> {
+                    Event event = eventMapById.get(dto.getId());
+                    if (event == null) return false;
+                    return event.getParticipantLimit() == 0 || dto.getConfirmedRequests() < event.getParticipantLimit();
+                })
+                .collect(Collectors.toList());
+        }
+
+        if (sort != null && sort.equalsIgnoreCase("VIEWS")) {
+            eventDtos.sort(Comparator.comparing(EventShortDto::getViews).reversed());
+        }
+
+        log.info("Public search prepared {} DTOs after enrichment and filtering.", eventDtos.size());
+        return eventDtos;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public EventFullDto getEventByIdPublic(Long eventId, String ipAddress) {
-        log.debug("Public: Fetching event id={}", eventId);
+    public EventFullDto getEventByIdPublic(Long eventId) {
+        log.info("Public: Fetching event id={}", eventId);
 
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new EntityNotFoundException("Event with id=" + eventId + " not found."));
+        Event event = eventRepository.findByIdAndState(eventId, EventState.PUBLISHED)
+            .orElseThrow(() -> new EntityNotFoundException(
+                String.format("Event with id=%d not found or is not published.", eventId)));
 
-        if (event.getState() != EventState.PUBLISHED) {
-            throw new EntityNotFoundException("Event with id=" + eventId + " is not published.");
+        long views = 0L;
+        try {
+            String eventUri = "/events/" + event.getId();
+            List<ViewStatsDto> stats = statsClient.getStats(
+                LocalDateTime.of(1970, 1, 1, 0, 0, 0), // Очень ранняя дата
+                LocalDateTime.now(),
+                List.of(eventUri),
+                true // Уникальные просмотры
+            );
+
+            if (stats != null && !stats.isEmpty()) {
+                Optional<ViewStatsDto> eventStat = stats.stream()
+                    .filter(s -> eventUri.equals(s.getUri()))
+                    .findFirst();
+                if (eventStat.isPresent()) {
+                    views = eventStat.get().getHits();
+                }
+            }
+            log.debug("Public: Views for event id={}: {}", eventId, views);
+        } catch (Exception e) {
+            log.error("Public: Failed to retrieve views for event id={}. Error: {}", eventId, e.getMessage());
         }
 
-        // TODO: Реализовать логику учета просмотров через ipAddress (StatsClient)
-        EventFullDto result = eventMapper.toEventFullDto(event);
-        log.debug("Public: Found event: {}", result);
-        return result;
+        long confirmedRequestsCount = requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
+        log.debug("Public: Confirmed requests for event id={}: {}", eventId, confirmedRequestsCount);
+
+        EventFullDto resultDto = eventMapper.toEventFullDto(event);
+        resultDto.setViews(views);
+        resultDto.setConfirmedRequests(confirmedRequestsCount);
+
+        log.info("Public: Found event id={} with title='{}', views={}, confirmedRequests={}",
+            eventId, resultDto.getTitle(), resultDto.getViews(), resultDto.getConfirmedRequests());
+        return resultDto;
     }
 
     @Override
@@ -184,6 +241,10 @@ public class EventServiceImpl implements EventService {
         }
 
         List<EventFullDto> result = eventMapper.toEventFullDtoList(eventPage.getContent());
+
+        Map<Long, Long> viewsData = getViewsForEvents(eventPage.getContent());
+        result.forEach(dto -> dto.setViews(viewsData.get(dto.getId())));
+
         log.debug("Admin search found {} events on page {}/{}", result.size(), pageable.getPageNumber(), eventPage.getTotalPages());
         return result;
     }
@@ -347,6 +408,10 @@ public class EventServiceImpl implements EventService {
     public EventFullDto getEventPrivate(Long userId, Long eventId) {
         log.debug("Fetching event id: {} for user id: {}", eventId, userId);
 
+        if (!userRepository.existsById(userId)) {
+            throw new EntityNotFoundException("User with id=" + userId + " not found.");
+        }
+
         Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         String.format("Event with id=%d and initiatorId=%d not found", eventId, userId)));
@@ -375,5 +440,43 @@ public class EventServiceImpl implements EventService {
         Event event = eventMapper.toEvent(newEventDto);
         event.setInitiator(user);
         return eventMapper.toEventFullDto(eventRepository.save(event));
+    }
+
+    private Map<Long, Long> getViewsForEvents(List<Event> events) {
+        if (events == null || events.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        List<String> uris = events.stream()
+            .map(event -> "/events/" + event.getId())
+            .distinct()
+            .collect(Collectors.toList());
+
+        LocalDateTime earliestCreation = events.stream()
+            .map(Event::getCreatedOn)
+            .min(LocalDateTime::compareTo)
+            .orElse(LocalDateTime.of(1970, 1, 1, 0, 0));
+
+        Map<Long, Long> viewsMap = new HashMap<>();
+        try {
+            List<ViewStatsDto> stats = statsClient.getStats(
+                earliestCreation,
+                LocalDateTime.now(),
+                uris,
+                true // Уникальные просмотры
+            );
+            if (stats != null) {
+                for (ViewStatsDto stat : stats) {
+                    try {
+                        Long eventId = Long.parseLong(stat.getUri().substring("/events/".length()));
+                        viewsMap.put(eventId, stat.getHits());
+                    } catch (NumberFormatException | IndexOutOfBoundsException e) {
+                        log.warn("Could not parse eventId from URI {} from stats service", stat.getUri());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to retrieve views for multiple events. Error: {}", e.getMessage());
+        }
+        return viewsMap;
     }
 }
