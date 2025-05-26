@@ -1,6 +1,5 @@
 package ru.practicum.explorewithme.main.service;
 
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,8 +28,6 @@ public class RequestServiceImpl implements RequestService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
 
-    private final EntityManager entityManager;
-
     @Override
     @Transactional
     public ParticipationRequestDto createRequest(Long userId, Long requestEventId) {
@@ -55,10 +52,9 @@ public class RequestServiceImpl implements RequestService {
     public List<ParticipationRequestDto> getRequests(Long userId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User", "Id", userId));
-        List<ParticipationRequestDto> result = requestRepository.findByRequester_Id(userId).stream()
+        return requestRepository.findByRequester_Id(userId).stream()
                 .sorted(Comparator.comparing(ParticipationRequest::getCreated).reversed())
                 .map(requestMapper::toRequestDto).toList();
-        return result;
     }
 
     @Override
@@ -66,10 +62,9 @@ public class RequestServiceImpl implements RequestService {
     public List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId) {
         if (!eventRepository.existsByIdAndInitiator_Id(eventId, userId))
             throw new EntityNotFoundException("Event with Id = " + eventId + " when initiator", "Id", userId);
-        List<ParticipationRequestDto> result = requestRepository.findByEvent_Id(eventId).stream()
+        return requestRepository.findByEvent_Id(eventId).stream()
                 .sorted(Comparator.comparing(ParticipationRequest::getCreated).reversed())
                 .map(requestMapper::toRequestDto).toList();
-        return result;
     }
 
     @Override
