@@ -3,6 +3,7 @@ package ru.practicum.explorewithme.main.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.explorewithme.main.dto.CommentDto;
@@ -48,6 +49,22 @@ public class CommentServiceImpl implements CommentService {
                 parameters.getSize(), parameters.getSort());
 
         List<Comment> result = commentRepository.findByEventIdAndIsDeletedFalse(eventId, pageable).getContent();
+
+        return commentMapper.toDtoList(result);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CommentDto> getUserComments(Long userId, int from, int size) {
+
+        if (!userRepository.existsById(userId)) {
+            throw new EntityNotFoundException("Пользователь с id " + userId + " не найден");
+        }
+
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdOn");
+        Pageable pageable = PageRequest.of(from / size, size, sort);
+
+        List<Comment> result = commentRepository.findByAuthorIdAndIsDeletedFalse(userId, pageable).getContent();
 
         return commentMapper.toDtoList(result);
     }
