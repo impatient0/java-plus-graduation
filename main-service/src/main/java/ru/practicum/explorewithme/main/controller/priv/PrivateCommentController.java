@@ -30,10 +30,8 @@ public class PrivateCommentController {
             @PathVariable @Positive Long userId,
             @RequestParam @Positive Long eventId,
             @Valid @RequestBody NewCommentDto newCommentDto) {
-
-        log.info("Создание нового комментария {} зарегистрированным пользователем c id {} " +
-                "к событию с id {}", newCommentDto, userId, eventId);
-
+        log.info("Создание нового комментария {} зарегистрированным пользователем c id {} к событию с id {}",
+                newCommentDto, userId, eventId);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(commentService.addComment(userId, eventId, newCommentDto));
     }
@@ -43,11 +41,10 @@ public class PrivateCommentController {
             @PathVariable @Positive Long userId,
             @PathVariable @Positive Long commentId,
             @Valid @RequestBody UpdateCommentDto updateCommentDto) {
-
-        log.info("Обновление комментария c id {} пользователем c id {}," +
-                " новый комментарий {}", commentId, userId, updateCommentDto);
-
-        return ResponseEntity.status(HttpStatus.OK).body(commentService.updateUserComment(userId, commentId, updateCommentDto));
+        log.info("Обновление комментария c id {} пользователем c id {}, новый комментарий {}",
+                commentId, userId, updateCommentDto);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(commentService.updateUserComment(userId, commentId, updateCommentDto));
     }
 
     @GetMapping
@@ -55,11 +52,18 @@ public class PrivateCommentController {
             @PathVariable @Positive Long userId,
             @RequestParam(defaultValue = "0") @PositiveOrZero int from,
             @RequestParam(defaultValue = "10") @Positive int size) {
-
         List<CommentDto> result = commentService.getUserComments(userId, from, size);
-
         log.info("Получение списка комментариев {} пользователя c id {}", result, userId);
-
         return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
+    @DeleteMapping("/{commentId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteComment(
+            @PathVariable @Positive Long userId,
+            @PathVariable @Positive Long commentId) {
+        log.info("User id={}: Received request to delete comment with Id: {}", userId, commentId);
+        commentService.deleteUserComment(userId, commentId);
+        log.info("User id={}: Comment with Id: {} marked as deleted", userId, commentId);
     }
 }

@@ -22,8 +22,8 @@ import ru.practicum.explorewithme.main.repository.UserRepository;
 import ru.practicum.explorewithme.main.service.params.PublicCommentParameters;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +37,6 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional(readOnly = true)
     public List<CommentDto> getCommentsForEvent(Long eventId, PublicCommentParameters parameters) {
-
         Event event = eventRepository.findByIdAndState(eventId, EventState.PUBLISHED)
                 .orElseThrow(() -> new EntityNotFoundException("Published event", "Id", eventId));
 
@@ -56,7 +55,6 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional(readOnly = true)
     public List<CommentDto> getUserComments(Long userId, int from, int size) {
-
         if (!userRepository.existsById(userId)) {
             throw new EntityNotFoundException("Пользователь с id " + userId + " не найден");
         }
@@ -72,7 +70,6 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public CommentDto addComment(Long userId, Long eventId, NewCommentDto newCommentDto) {
-
         User author = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь с id " + userId + " не найден"));
 
@@ -88,7 +85,6 @@ public class CommentServiceImpl implements CommentService {
         }
 
         Comment comment = commentMapper.toComment(newCommentDto);
-
         comment.setAuthor(author);
         comment.setEvent(event);
 
@@ -98,17 +94,16 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public CommentDto updateUserComment(Long userId, Long commentId, UpdateCommentDto updateCommentDto) {
-
         Optional<Comment> comment = commentRepository.findById(commentId);
 
         if (comment.isEmpty()) {
-            throw new EntityNotFoundException("Комментарий с id" + commentId + " не найден");
+            throw new EntityNotFoundException("Комментарий с id " + commentId + " не найден");
         }
 
         Comment existedComment = comment.get();
 
         if (!existedComment.getAuthor().getId().equals(userId)) {
-            throw new EntityNotFoundException("Искомый комментарий с id " + commentId + " пользователя с id " + userId + "не найден");
+            throw new EntityNotFoundException("Искомый комментарий с id " + commentId + " пользователя с id " + userId + " не найден");
         }
 
         if (existedComment.isDeleted()) {
@@ -123,5 +118,42 @@ public class CommentServiceImpl implements CommentService {
         existedComment.setEdited(true);
 
         return commentMapper.toDto(commentRepository.saveAndFlush(existedComment));
+    }
+
+    @Override
+    @Transactional
+    public void deleteCommentByAdmin(Long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Comment with id=%d not found", commentId)));
+        if (!comment.isDeleted()) {
+            comment.setDeleted(true);
+            commentRepository.save(comment);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void deleteUserComment(Long userId, Long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Comment with id=%d not found", commentId)));
+        if (!comment.getAuthor().getId().equals(userId)) {
+            throw new EntityNotFoundException(String.format("Comment with id=%d not found for user with id=%d", commentId, userId));
+        }
+        if (!comment.isDeleted()) {
+            comment.setDeleted(true);
+            commentRepository.save(comment);
+        }
+    }
+
+    @Override
+    @Transactional
+    public CommentDto restoreCommentByAdmin(Long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Comment with id=%d not found", commentId)));
+        if (comment.isDeleted()) {
+            comment.setDeleted(false);
+            commentRepository.save(comment);
+        }
+        return commentMapper.toDto(comment);
     }
 }
