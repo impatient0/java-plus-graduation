@@ -1,6 +1,12 @@
 package ru.practicum.explorewithme.main.service;
 
+import com.querydsl.core.BooleanBuilder;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -15,18 +21,17 @@ import ru.practicum.explorewithme.main.mapper.CommentMapper;
 import ru.practicum.explorewithme.main.model.Comment;
 import ru.practicum.explorewithme.main.model.Event;
 import ru.practicum.explorewithme.main.model.EventState;
+import ru.practicum.explorewithme.main.model.QComment;
 import ru.practicum.explorewithme.main.model.User;
 import ru.practicum.explorewithme.main.repository.CommentRepository;
 import ru.practicum.explorewithme.main.repository.EventRepository;
 import ru.practicum.explorewithme.main.repository.UserRepository;
+import ru.practicum.explorewithme.main.service.params.AdminCommentSearchParams;
 import ru.practicum.explorewithme.main.service.params.PublicCommentParameters;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CommentServiceImpl implements CommentService {
 
     private final UserRepository userRepository;
@@ -155,5 +160,34 @@ public class CommentServiceImpl implements CommentService {
             commentRepository.save(comment);
         }
         return commentMapper.toDto(comment);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CommentDto> getAllCommentsAdmin(AdminCommentSearchParams searchParams, int from, int size) {
+        log.debug("Admin: Searching all comments with params: {}, from={}, size={}", searchParams, from, size);
+
+        QComment qComment = QComment.comment;
+        BooleanBuilder predicate = new BooleanBuilder();
+
+        if (searchParams.getUserId() != null) {
+            predicate.and(qComment.author.id.eq(searchParams.getUserId()));
+        }
+
+        if (searchParams.getEventId() != null) {
+            predicate.and(qComment.event.id.eq(searchParams.getEventId()));
+        }
+
+        if (searchParams.getIsDeleted() != null) {
+            predicate.and(qComment.isDeleted.eq(searchParams.getIsDeleted()));
+        }
+
+        Pageable pageable = PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "createdOn"));
+
+        Page<Comment> commentPage = commentRepository.findAll(predicate, pageable);
+
+        List<CommentDto> result = commentMapper.toDtoList(commentPage.getContent());
+        log.debug("Admin: Found {} comments for the given criteria.", result.size());
+        return result;
     }
 }
