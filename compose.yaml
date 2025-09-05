@@ -1,8 +1,26 @@
 services:
+  discovery-server:
+    build: infra/discovery-server
+    container_name: ewm-discovery-server-compose
+    hostname: discovery-server
+    ports:
+      - "8761:8761"
+    environment:
+      EUREKA_HOSTNAME: discovery-server
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8761/actuator/health || exit 1" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
   stats-server:
     build: core/stats-service/stats-server
     container_name: ewm-stats-server-compose
     depends_on:
+      discovery-server:
+        condition: service_healthy
       stats-db:
         condition: service_healthy
     ports:
@@ -36,6 +54,8 @@ services:
     build: core/main-service
     container_name: ewm-main-service-compose
     depends_on:
+      discovery-server:
+        condition: service_healthy
       ewm-db:
         condition: service_healthy
       stats-server:
