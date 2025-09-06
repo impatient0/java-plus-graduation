@@ -38,6 +38,25 @@
             <artifactId>ewm-common</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+          <groupId>org.springframework.cloud</groupId>
+          <artifactId>spring-cloud-openfeign-core</artifactId>
+        </dependency>
+      <dependency>
+        <groupId>com.squareup.okhttp3</groupId>
+        <artifactId>mockwebserver</artifactId>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-contract-stub-runner</artifactId>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-commons</artifactId>
+        <scope>test</scope>
+      </dependency>
     </dependencies>
 
 </project>

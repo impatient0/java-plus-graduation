@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.explorewithme.stats.client.StatsClient;
 import ru.practicum.explorewithme.stats.dto.EndpointHitDto;
 import ru.practicum.explorewithme.stats.dto.ViewStatsDto;
 import ru.practicum.explorewithme.stats.server.service.StatsService;
@@ -25,7 +26,7 @@ import ru.practicum.explorewithme.stats.server.service.StatsService;
 @RequiredArgsConstructor
 @Slf4j
 @SuppressWarnings("unused")
-public class StatsController {
+public class StatsController implements StatsClient {
 
     private final StatsService statsService;
 
