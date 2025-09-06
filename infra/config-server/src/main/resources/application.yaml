@@ -22,6 +22,7 @@ eureka:
       enabled: true
 
   instance:
+    health-check-url-path: /actuator/health/readiness
     prefer-ip-address: true
 
 management:

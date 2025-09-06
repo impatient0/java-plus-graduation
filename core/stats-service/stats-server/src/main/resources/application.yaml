@@ -23,5 +23,6 @@ eureka:
     healthcheck:
       enabled: true
   instance:
+    health-check-url-path: /actuator/health/readiness
     instance-id: "${spring.application.name}:${random.value}"
     leaseRenewalIntervalInSeconds: 10
