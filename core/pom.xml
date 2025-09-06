@@ -21,6 +21,7 @@
   <modules>
     <module>main-service</module>
     <module>stats-service</module>
+    <module>ewm-common</module>
   </modules>
 
 </project>

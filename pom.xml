@@ -32,7 +32,6 @@
 	</properties>
 
 	<modules>
-		<module>ewm-common</module>
     <module>infra</module>
     <module>core</module>
   </modules>
