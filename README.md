@@ -1,162 +1,132 @@
 # Explore With Me (Исследуй со мной)
 
-Приложение-афиша, позволяющее пользователям делиться информацией об интересных событиях и находить компанию для участия в них. Изначально проект был разработан в команде в рамках обучения в Яндекс Практикуме, а в настоящее время дорабатывается и расширяется как индивидуальный дипломный проект.
+Приложение-афиша, позволяющее пользователям делиться информацией об интересных событиях и находить компанию для участия в них. Изначально проект был разработан в команде в рамках обучения в Яндекс Практикуме.
+
+В настоящее время проект развивается как индивидуальный дипломный проект, в рамках которого архитектура была переведена на современный микросервисный стек с использованием **Spring Cloud**.
 
 ## Оглавление
 
+- [Архитектура](#архитектура)
 - [Технологии](#технологии)
 - [Структура проекта](#структура-проекта)
 - [API Спецификации](#api-спецификации)
 - [Начало работы](#начало-работы)
     - [Предварительные требования](#предварительные-требования)
     - [Сборка проекта](#сборка-проекта)
-    - [Запуск с использованием Docker Compose](#запуск-с-использованием-docker-compose)
+    - [Запуск с использованием Docker Compose (Рекомендуемый способ)](#запуск-с-использованием-docker-compose-рекомендуемый-способ)
     - [Локальный запуск для разработки (IntelliJ IDEA)](#локальный-запуск-для-разработки-intellij-idea)
-        - [Локальный запуск Stats Service](#локальный-запуск-stats-service-stats-server)
-        - [Локальный запуск Main Service](#локальный-запуск-main-service-main-service)
 - [Примеры использования API](#примеры-использования-api)
-    - [Публичные эндпоинты Событий, Категорий, Подборок](#публичные-эндпоинты-событий-категорий-подборок)
-    - [Публичные эндпоинты Комментариев](#публичные-эндпоинты-комментариев)
 - [Тестирование](#тестирование)
-    - [Юнит и Интеграционные тесты](#юнит-и-интеграционные-тесты)
-    - [Postman-тесты для Дополнительной Функциональности](#postman-тесты-для-дополнительной-функциональности)
 - [Реализованная Дополнительная Функциональность: Комментарии](#реализованная-дополнительная-функциональность-комментарии)
 - [История проекта и Автор](#история-проекта-и-автор)
+
+## Архитектура
+
+Приложение построено на основе микросервисной архитектуры с использованием компонентов **Spring Cloud** для обеспечения отказоустойчивости, масштабируемости и централизованного управления.
+
+-   **API Gateway (`gateway-server`)**: Единая точка входа для всех внешних запросов. Отвечает за маршрутизацию, балансировку нагрузки, а также реализует паттерны отказоустойчивости (Retries, Circuit Breaker с использованием Resilience4j).
+-   **Discovery Server (`discovery-server`)**: Сервер обнаружения сервисов (Netflix Eureka). Все микросервисы регистрируются в нем, что позволяет им динамически находить друг друга по имени, не используя статические IP-адреса и порты.
+-   **Config Server (`config-server`)**: Сервер конфигурации. Предоставляет централизованное управление конфигурацией для всех сервисов. Сами сервисы при запуске запрашивают свои настройки у Config Server.
+-   **Межсервисное взаимодействие**: Для коммуникации между `main-service` и `stats-server` используется декларативный HTTP-клиент **OpenFeign**, который интегрирован с Eureka для динамического обнаружения сервисов.
 
 ## Технологии
 
 - Java 21
-- Spring Boot 3.4.5
+- Spring Boot 3.5.5
+- Spring Cloud (Gateway, Netflix Eureka, Config)
+- OpenFeign, Resilience4j (межсервисное взаимодействие и отказоустойчивость)
 - Spring Data JPA, QueryDSL
-- Spring MVC, Spring AOP (для интеграции со StatsClient)
+- Spring MVC, Spring AOP (интеграция со StatsClient)
 - PostgreSQL 16.1
 - Maven
 - Docker / Docker Compose
-- Lombok
-- MapStruct (для маппинга DTO)
-- JUnit 5, Mockito
-- Testcontainers
-- Checkstyle, Spotbugs, Jacoco (для контроля качества кода)
+- Lombok, MapStruct
+- JUnit 5, Mockito, Testcontainers
+- Checkstyle, Spotbugs, Jacoco (контроль качества кода)
 
 ## Структура проекта
 
-Проект является многомодульным Maven-проектом и состоит из следующих основных частей:
+Проект является многомодульным Maven-проектом и разделен на два логических слоя: `core` (бизнес-логика) и `infra` (инфраструктурные сервисы).
 
-- `explore-with-me` (корневой POM)
-    - `ewm-common`: Общий модуль, содержащий классы, используемые как основным сервисом, так и сервисом статистики (например, `ApiError.java`, общие константы).
-    - `main-service`: Основной сервис приложения. Отвечает за бизнес-логику, управление пользователями, событиями, категориями, подборками и запросами на участие. Взаимодействует с `stats-client` для сбора статистики.
-        - `Dockerfile`
-        - `schema.sql` (для инициализации схемы БД `ewm_main_db`)
-    - `stats-service` (родительский POM для модулей статистики)
-        - `stats-dto`: Data Transfer Objects (DTO) для сервиса статистики.
-        *   `stats-client`: HTTP-клиент для взаимодействия с API сервиса статистики (используется `main-service`).
-        *   `stats-server`: Сервис статистики (сбор и предоставление данных о запросах к эндпоинтам).
-            *   `Dockerfile`
-            *   `schema.sql` (для инициализации схемы БД `ewm_stats_db`)
+```
+explore-with-me/
+|
+├── core/           (Модули, реализующие бизнес-логику приложения)
+│   ├── ewm-common/     (Общий модуль для core-сервисов)
+│   ├── main-service/
+│   └── stats-service/
+│       ├── stats-client/
+│       ├── stats-dto/
+│       └── stats-server/
+|
+└── infra/          (Инфраструктурные сервисы Spring Cloud)
+    ├── config-server/      (Сервер конфигурации)
+    ├── discovery-server/   (Сервер обнаружения)
+    └── gateway-server/     (API-шлюз)
+```
 
 ## API Спецификации
 
-Актуальные спецификации API, включая эндпоинты для реализованной дополнительной функциональности "Комментарии", можно найти в репозитории:
+Спецификации API остаются без изменений, так как инфраструктурные преобразования не затронули публичный контракт сервисов.
 
 -   **Основной сервис:** [`ewm-main-service-spec.json`](https://github.com/impatient0/java-plus-graduation/blob/main/ewm-main-service-spec.json)
-    *   *Примечание: Оригинальная спецификация от Яндекс Практикума [здесь](https://raw.githubusercontent.com/yandex-praktikum/java-explore-with-me/main/ewm-main-service-spec.json) не включает эндпоинты для комментариев. Описание реализованных эндпоинтов для комментариев см. в разделе [Реализованная Дополнительная Функциональность: Комментарии](#реализованная-дополнительная-функциональность-комментарии).*
 -   **Сервис статистики:** [`ewm-stats-service.json`](https://github.com/impatient0/java-plus-graduation/blob/main/ewm-stats-service-spec.json)
-
-*Рекомендуется просматривать через Swagger Editor или аналогичный инструмент.*
 
 ## Начало работы
 
 ### Предварительные требования
 
-Для работы с проектом вам понадобятся:
-
 - JDK 21
 - Apache Maven 3.6+
 - Docker и Docker Compose
-- IntelliJ IDEA (рекомендуется)
 
 ### Сборка проекта
 
-Для сборки всех модулей проекта (включая генерацию Q-типов QueryDSL и реализаций MapStruct) выполните:
+Для сборки всех модулей проекта выполните команду в корневой директории:
 ```bash
 mvn clean install
 ```
-Эта команда также запустит статические анализаторы кода и юнит-тесты.
 
-### Запуск с использованием Docker Compose
+### Запуск с использованием Docker Compose (Рекомендуемый способ)
 
-Это основной способ запуска всего приложения для проверки взаимодействия сервисов.
+Это основной способ запуска всего приложения, который поднимает все 5 сервисов в правильном порядке.
 
 1.  **Соберите проект:** `mvn clean install`
 2.  **Запустите сервисы:**
     В корневой директории проекта выполните:
     ```bash
-    docker-compose up --build -d
+    docker-compose up --build
     ```
-    - Сервис статистики (`stats-server`): `http://localhost:9090`
-    - Основной сервис (`main-service`): `http://localhost:8080`
+    Эта команда запустит:
+    - `discovery-server`
+    - `config-server`
+    - `stats-server` (и его БД)
+    - `main-service` (и его БД)
+    - `gateway-server`
 
-3.  **Просмотр логов:**
-    ```bash
-    docker-compose logs -f main-service
-    docker-compose logs -f stats-server
-    ```
+3.  **Доступ к приложению:**
+    - **Единая точка входа (API Gateway):** `http://localhost:8080`
+    - **Eureka Dashboard:** `http://localhost:8761`
+
 4.  **Остановка сервисов:**
-    ```bash
-    docker-compose down
-    ```
-    Для удаления volumes (данных БД):
     ```bash
     docker-compose down -v
     ```
-    *Примечание: При первом запуске `docker-compose up` скрипты `schema.sql` из каждого сервиса будут выполнены для создания таблиц в соответствующих базах данных.*
 
 ### Локальный запуск для разработки (IntelliJ IDEA)
 
-#### Локальный запуск Stats Service (`stats-server`)
+Локальный запуск требует ручного старта всех сервисов в правильной последовательности. Это полезно для отладки конкретного сервиса.
 
-Предусмотрен профиль запуска `stat-local` в IntelliJ IDEA.
+**Важно:** Все сервисы (кроме `gateway-server` и `discovery-server`) запускаются на случайных портах и получают свою конфигурацию от `config-server`.
 
-1.  **База данных для `stats-server`:** Настройте локальный PostgreSQL согласно `stats-service/stats-server/src/main/resources/application-local.yml` (порт, имя БД, пользователь, пароль).
-    ```yaml
-    # stats-service/stats-server/src/main/resources/application-local.yml
-    spring:
-      datasource:
-        url: jdbc:postgresql://localhost:6543/ewm_stats_db # Пример
-        username: stats_user
-        password: stats_password
-      jpa:
-        hibernate:
-          ddl-auto: validate # Используется schema.sql из classpath (src/main/resources)
-      sql:
-        init:
-          mode: always # Для выполнения schema.sql при локальном запуске
-    ```
-2.  **Запуск `StatsServerApplication`:** Используйте Run Configuration "stat-local" (VM options: `-Dspring.profiles.active=local`).
+**Порядок запуска:**
 
-#### Локальный запуск Main Service (`main-service`)
+1.  **`discovery-server`**: Запустите `DiscoveryServerApplication`. Дождитесь полного старта.
+2.  **`config-server`**: Запустите `ConfigServerApplication`. Убедитесь, что он зарегистрировался в Eureka.
+3.  **`stats-server`** и **`main-service`**: Запустите профили `main-local` и `stats-local` (порядок между ними не важен). Они запустят приложения `MainServiceApplication` и `StatsServerApplication`, а также их БД.
+4.  **`gateway-server`**: Запустите `GatewayServerApplication`.
 
-Предусмотрен профиль запуска `main-local` в IntelliJ IDEA.
-
-1.  **База данных для `main-service`:** Настройте локальный PostgreSQL согласно `main-service/src/main/resources/application-local.yml`.
-    ```yaml
-    # main-service/src/main/resources/application-local.yml
-    stats-server:
-      url: http://localhost:9090 # Если stats-server тоже запущен локально
-
-    spring:
-      datasource:
-        url: jdbc:postgresql://localhost:5432/ewm_main_db # Пример
-        username: ewm_user
-        password: ewm_password
-      jpa:
-        hibernate:
-          ddl-auto: validate # Используется schema.sql из classpath
-      sql:
-        init:
-          mode: always # Для выполнения schema.sql при локальном запуске
-    ```
-2.  **Запуск `MainServiceApplication`:** Используйте Run Configuration "main-local" (VM options: `-Dspring.profiles.active=local`). Убедитесь, что `stats-server` уже запущен (локально или в Docker), так как `main-service` от него зависит.
+После запуска всех сервисов **все API-запросы** должны направляться на порт API Gateway: `http://localhost:8080`.
 
 ## Примеры использования API
 
