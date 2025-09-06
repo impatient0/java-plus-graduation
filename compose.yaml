@@ -29,10 +29,25 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-      start_period: 5s
+      start_period: 10s
     environment:
       EUREKA_URI: http://discovery-server:8761/eureka/
       PORT: 8888
+
+  gateway-server:
+    build: infra/gateway-server
+    container_name: gateway-server
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    environment:
+      EUREKA_URI: http://discovery-server:8761/eureka/
+      PORT: 8080
 
   stats-server:
     build: core/stats-service/stats-server
@@ -85,7 +100,7 @@ services:
       stats-server:
         condition: service_started
     ports:
-      - "8080:8080"
+      - "8081:8081"
     environment:
       EUREKA_URI: http://discovery-server:8761/eureka/
       SPRING_DATASOURCE_URL: jdbc:postgresql://ewm-db:5432/ewm_main_db

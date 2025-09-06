@@ -1,3 +1,6 @@
+server:
+  port: 8081
+
 stats-server:
   url: http://localhost:9090
 
