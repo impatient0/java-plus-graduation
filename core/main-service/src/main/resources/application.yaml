@@ -1,23 +1,20 @@
-server:
-  port: 8080
-
-stats-server:
-  url: http://stats-server:9090
-
 spring:
   application:
     name: main-service
-  jpa:
-    hibernate:
-      ddl-auto: validate
-  datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
-    driver-class-name: org.postgresql.Driver
-  sql:
-    init:
-      mode: always
+  profiles:
+    active: postgres
+  config:
+    import: "configserver:"
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        serviceId: config-server
+      fail-fast: true
+      retry:
+        max-attempts: 10
+        initial-interval: 1000
+        useRandomPolicy: true
 
 eureka:
   client:
