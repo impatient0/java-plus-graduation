@@ -15,6 +15,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import ru.practicum.explorewithme.stats.client.StatsClient;
+import ru.practicum.explorewithme.stats.client.aop.StatsHitAspect;
 import ru.practicum.explorewithme.stats.dto.EndpointHitDto;
 
 import java.time.LocalDateTime;

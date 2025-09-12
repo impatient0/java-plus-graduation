@@ -1,4 +1,4 @@
-package ru.practicum.explorewithme.main.aspect;
+package ru.practicum.explorewithme.stats.client.aop;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;

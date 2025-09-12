@@ -1,4 +1,4 @@
-package ru.practicum.explorewithme.main.aspect;
+package ru.practicum.explorewithme.stats.client.aop;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
