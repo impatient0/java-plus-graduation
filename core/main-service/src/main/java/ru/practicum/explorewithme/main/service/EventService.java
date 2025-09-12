@@ -1,12 +1,12 @@
 package ru.practicum.explorewithme.main.service;
 
 import java.util.List;
-import ru.practicum.explorewithme.main.dto.EventFullDto;
-import ru.practicum.explorewithme.main.dto.EventShortDto;
-import ru.practicum.explorewithme.main.dto.UpdateEventAdminRequestDto;
-import ru.practicum.explorewithme.main.dto.UpdateEventUserRequestDto;
+import ru.practicum.explorewithme.api.dto.event.EventFullDto;
+import ru.practicum.explorewithme.api.dto.event.EventShortDto;
+import ru.practicum.explorewithme.api.dto.event.UpdateEventAdminRequestDto;
+import ru.practicum.explorewithme.api.dto.event.UpdateEventUserRequestDto;
 import ru.practicum.explorewithme.main.service.params.AdminEventSearchParams;
-import ru.practicum.explorewithme.main.dto.NewEventDto;
+import ru.practicum.explorewithme.api.dto.event.NewEventDto;
 import ru.practicum.explorewithme.main.service.params.PublicEventSearchParams;
 
 public interface EventService {

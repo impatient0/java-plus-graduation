@@ -3,9 +3,9 @@ package ru.practicum.explorewithme.main.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
-import ru.practicum.explorewithme.main.dto.CommentAdminDto; // <<< Новый импорт
-import ru.practicum.explorewithme.main.dto.CommentDto;
-import ru.practicum.explorewithme.main.dto.NewCommentDto;
+import ru.practicum.explorewithme.api.dto.comment.CommentAdminDto; // <<< Новый импорт
+import ru.practicum.explorewithme.api.dto.comment.CommentDto;
+import ru.practicum.explorewithme.api.dto.comment.NewCommentDto;
 import ru.practicum.explorewithme.main.model.Comment;
 
 import java.util.List;

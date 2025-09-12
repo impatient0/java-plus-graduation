@@ -27,11 +27,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.explorewithme.main.dto.EventFullDto;
-import ru.practicum.explorewithme.main.dto.EventShortDto;
-import ru.practicum.explorewithme.main.dto.UpdateEventUserRequestDto;
-import ru.practicum.explorewithme.main.error.BusinessRuleViolationException;
-import ru.practicum.explorewithme.main.error.EntityNotFoundException;
+import ru.practicum.explorewithme.api.dto.event.EventFullDto;
+import ru.practicum.explorewithme.api.dto.event.EventShortDto;
+import ru.practicum.explorewithme.api.dto.event.UpdateEventUserRequestDto;
+import ru.practicum.explorewithme.api.exception.BusinessRuleViolationException;
+import ru.practicum.explorewithme.api.exception.EntityNotFoundException;
 import ru.practicum.explorewithme.main.service.EventService;
 import ru.practicum.explorewithme.main.service.RequestService;
 

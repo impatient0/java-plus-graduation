@@ -5,13 +5,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.explorewithme.main.dto.CategoryDto;
-import ru.practicum.explorewithme.main.dto.NewCategoryDto;
-import ru.practicum.explorewithme.main.error.EntityAlreadyExistsException;
-import ru.practicum.explorewithme.main.error.EntityDeletedException;
+import ru.practicum.explorewithme.api.dto.event.CategoryDto;
+import ru.practicum.explorewithme.api.dto.event.NewCategoryDto;
+import ru.practicum.explorewithme.api.exception.EntityAlreadyExistsException;
+import ru.practicum.explorewithme.api.exception.EntityDeletedException;
 import ru.practicum.explorewithme.main.mapper.CategoryMapper;
 import ru.practicum.explorewithme.main.model.Category;
-import ru.practicum.explorewithme.main.error.EntityNotFoundException;
+import ru.practicum.explorewithme.api.exception.EntityNotFoundException;
 import ru.practicum.explorewithme.main.repository.CategoryRepository;
 import ru.practicum.explorewithme.main.repository.EventRepository;
 

@@ -11,10 +11,10 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import ru.practicum.explorewithme.main.dto.NewUserRequestDto;
-import ru.practicum.explorewithme.main.dto.UserDto;
-import ru.practicum.explorewithme.main.error.EntityAlreadyExistsException;
-import ru.practicum.explorewithme.main.error.EntityNotFoundException;
+import ru.practicum.explorewithme.api.dto.user.NewUserRequestDto;
+import ru.practicum.explorewithme.api.dto.user.UserDto;
+import ru.practicum.explorewithme.api.exception.EntityAlreadyExistsException;
+import ru.practicum.explorewithme.api.exception.EntityNotFoundException;
 import ru.practicum.explorewithme.main.model.User;
 import ru.practicum.explorewithme.main.repository.UserRepository;
 

@@ -34,13 +34,14 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import ru.practicum.explorewithme.main.dto.EventFullDto;
-import ru.practicum.explorewithme.main.dto.EventShortDto;
-import ru.practicum.explorewithme.main.dto.NewEventDto;
-import ru.practicum.explorewithme.main.dto.UpdateEventAdminRequestDto;
-import ru.practicum.explorewithme.main.dto.UpdateEventUserRequestDto;
-import ru.practicum.explorewithme.main.error.BusinessRuleViolationException;
-import ru.practicum.explorewithme.main.error.EntityNotFoundException;
+import ru.practicum.explorewithme.api.dto.event.EventFullDto;
+import ru.practicum.explorewithme.api.dto.event.EventShortDto;
+import ru.practicum.explorewithme.api.dto.event.LocationDto;
+import ru.practicum.explorewithme.api.dto.event.NewEventDto;
+import ru.practicum.explorewithme.api.dto.event.UpdateEventAdminRequestDto;
+import ru.practicum.explorewithme.api.dto.event.UpdateEventUserRequestDto;
+import ru.practicum.explorewithme.api.exception.BusinessRuleViolationException;
+import ru.practicum.explorewithme.api.exception.EntityNotFoundException;
 import ru.practicum.explorewithme.main.mapper.EventMapper;
 import ru.practicum.explorewithme.main.model.*;
 import ru.practicum.explorewithme.main.repository.CategoryRepository;
@@ -102,7 +103,7 @@ class EventServiceImplTest {
             .category(testCategory.getId())
             .description("New Event Description")
             .eventDate(plusThreeHours)
-            .location(Location.builder().lat(10f).lon(20f).build())
+            .location(LocationDto.builder().lat(10f).lon(20f).build())
             .paid(false)
             .participantLimit(0L)
             .requestModeration(true)
@@ -114,7 +115,8 @@ class EventServiceImplTest {
             .category(Category.builder().id(newEventDto.getCategory()).build())
             .description(newEventDto.getDescription())
             .eventDate(newEventDto.getEventDate())
-            .location(newEventDto.getLocation())
+            .location(new Location(newEventDto.getLocation().getLat(), newEventDto.getLocation()
+                .getLon()))
             .paid(newEventDto.getPaid())
             .participantLimit(newEventDto.getParticipantLimit().intValue())
             .requestModeration(newEventDto.getRequestModeration())
@@ -128,7 +130,8 @@ class EventServiceImplTest {
             .description(newEventDto.getDescription())
             .eventDate(newEventDto.getEventDate())
             .initiator(testUser)
-            .location(newEventDto.getLocation())
+            .location(new Location(newEventDto.getLocation().getLat(), newEventDto.getLocation()
+                .getLon()))
             .paid(newEventDto.getPaid())
             .participantLimit(newEventDto.getParticipantLimit().intValue())
             .requestModeration(newEventDto.getRequestModeration())
@@ -400,7 +403,7 @@ class EventServiceImplTest {
             NewEventDto dtoWithNonExistentCategory = NewEventDto.builder()
                 .category(nonExistentCategoryId)
                 .annotation("A").description("D").title("T").eventDate(plusThreeHours)
-                .location(Location.builder().lat(1f).lon(1f).build())
+                .location(LocationDto.builder().lat(1f).lon(1f).build())
                 .build();
 
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
@@ -423,7 +426,7 @@ class EventServiceImplTest {
                 .category(testCategory.getId())
                 .eventDate(now.plusHours(1)) // Меньше чем через 2 часа
                 .annotation("A").description("D").title("T")
-                .location(Location.builder().lat(1f).lon(1f).build())
+                .location(LocationDto.builder().lat(1f).lon(1f).build())
                 .build();
 
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));

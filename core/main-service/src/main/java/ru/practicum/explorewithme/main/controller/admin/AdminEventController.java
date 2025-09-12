@@ -9,8 +9,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.explorewithme.main.dto.EventFullDto;
-import ru.practicum.explorewithme.main.dto.UpdateEventAdminRequestDto;
+import ru.practicum.explorewithme.api.dto.event.EventFullDto;
+import ru.practicum.explorewithme.api.dto.event.UpdateEventAdminRequestDto;
 import ru.practicum.explorewithme.main.model.EventState;
 import ru.practicum.explorewithme.main.service.EventService;
 

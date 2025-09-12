@@ -1,8 +1,8 @@
 package ru.practicum.explorewithme.main.service;
 
-import ru.practicum.explorewithme.main.dto.CompilationDto;
-import ru.practicum.explorewithme.main.dto.NewCompilationDto;
-import ru.practicum.explorewithme.main.dto.UpdateCompilationRequestDto;
+import ru.practicum.explorewithme.api.dto.event.CompilationDto;
+import ru.practicum.explorewithme.api.dto.event.NewCompilationDto;
+import ru.practicum.explorewithme.api.dto.event.UpdateCompilationRequestDto;
 
 import java.util.List;
 

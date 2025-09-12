@@ -15,6 +15,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import ru.practicum.explorewithme.api.exception.BusinessRuleViolationException;
+import ru.practicum.explorewithme.api.exception.EntityAlreadyExistsException;
+import ru.practicum.explorewithme.api.exception.EntityDeletedException;
+import ru.practicum.explorewithme.api.exception.EntityNotFoundException;
 import ru.practicum.explorewithme.common.error.ApiError;
 
 @RestControllerAdvice

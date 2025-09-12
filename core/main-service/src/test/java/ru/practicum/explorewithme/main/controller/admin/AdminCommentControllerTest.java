@@ -27,8 +27,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.explorewithme.main.dto.CommentAdminDto;
-import ru.practicum.explorewithme.main.dto.UserShortDto;
+import ru.practicum.explorewithme.api.dto.comment.CommentAdminDto;
+import ru.practicum.explorewithme.api.dto.user.UserShortDto;
 import ru.practicum.explorewithme.main.service.CommentService;
 import ru.practicum.explorewithme.main.service.params.AdminCommentSearchParams;
 

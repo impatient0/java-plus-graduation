@@ -2,8 +2,8 @@ package ru.practicum.explorewithme.main.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import ru.practicum.explorewithme.main.dto.CategoryDto;
-import ru.practicum.explorewithme.main.dto.NewCategoryDto;
+import ru.practicum.explorewithme.api.dto.event.CategoryDto;
+import ru.practicum.explorewithme.api.dto.event.NewCategoryDto;
 import ru.practicum.explorewithme.main.model.Category;
 
 @Mapper(componentModel = "spring")

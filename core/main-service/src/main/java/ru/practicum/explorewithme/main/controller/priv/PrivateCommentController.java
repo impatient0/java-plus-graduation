@@ -9,9 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.explorewithme.main.dto.CommentDto;
-import ru.practicum.explorewithme.main.dto.NewCommentDto;
-import ru.practicum.explorewithme.main.dto.UpdateCommentDto;
+import ru.practicum.explorewithme.api.dto.comment.CommentDto;
+import ru.practicum.explorewithme.api.dto.comment.NewCommentDto;
+import ru.practicum.explorewithme.api.dto.comment.UpdateCommentDto;
 import ru.practicum.explorewithme.main.service.CommentService;
 
 import java.util.List;

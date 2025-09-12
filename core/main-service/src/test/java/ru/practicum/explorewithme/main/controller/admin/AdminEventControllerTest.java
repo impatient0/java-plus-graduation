@@ -10,11 +10,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.explorewithme.main.dto.EventFullDto;
-import ru.practicum.explorewithme.main.dto.UpdateEventAdminRequestDto;
-import ru.practicum.explorewithme.main.error.BusinessRuleViolationException;
-import ru.practicum.explorewithme.main.error.EntityNotFoundException;
-import ru.practicum.explorewithme.main.model.EventState;
+import ru.practicum.explorewithme.api.dto.event.EventFullDto;
+import ru.practicum.explorewithme.api.dto.event.UpdateEventAdminRequestDto;
+import ru.practicum.explorewithme.api.enums.EventState;
+import ru.practicum.explorewithme.api.exception.BusinessRuleViolationException;
+import ru.practicum.explorewithme.api.exception.EntityNotFoundException;
 import ru.practicum.explorewithme.main.service.EventService;
 import ru.practicum.explorewithme.main.service.params.AdminEventSearchParams;
 
@@ -106,7 +106,7 @@ class AdminEventControllerTest {
         @DisplayName("Должен корректно передавать все параметры фильтрации в сервис")
         void withAllFilters_shouldPassFiltersToService() throws Exception {
             List<Long> userIds = List.of(1L, 2L);
-            List<EventState> states = List.of(EventState.PENDING, EventState.PUBLISHED);
+            List<ru.practicum.explorewithme.main.model.EventState> states = List.of(ru.practicum.explorewithme.main.model.EventState.PENDING, ru.practicum.explorewithme.main.model.EventState.PUBLISHED);
             List<Long> categoryIds = List.of(10L, 20L);
             LocalDateTime rangeStart = LocalDateTime.now().minusDays(1).withNano(0);
             LocalDateTime rangeEnd = LocalDateTime.now().plusDays(1).withNano(0);

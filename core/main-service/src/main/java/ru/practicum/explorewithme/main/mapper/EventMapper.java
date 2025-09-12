@@ -4,12 +4,12 @@ import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
-import ru.practicum.explorewithme.main.dto.EventFullDto;
-import ru.practicum.explorewithme.main.dto.EventShortDto;
-import ru.practicum.explorewithme.main.dto.NewEventDto;
+import ru.practicum.explorewithme.api.dto.event.EventFullDto;
+import ru.practicum.explorewithme.api.dto.event.EventShortDto;
+import ru.practicum.explorewithme.api.dto.event.NewEventDto;
 import ru.practicum.explorewithme.main.model.Event;
 
-@Mapper(componentModel = "spring", uses = {CategoryMapper.class, UserMapper.class})
+@Mapper(componentModel = "spring", uses = {CategoryMapper.class, UserMapper.class, LocationMapper.class, EnumMapper.class})
 public interface EventMapper {
 
     @Mappings({

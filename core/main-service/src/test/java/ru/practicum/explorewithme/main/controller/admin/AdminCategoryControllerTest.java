@@ -10,10 +10,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.explorewithme.main.dto.CategoryDto;
-import ru.practicum.explorewithme.main.dto.NewCategoryDto;
-import ru.practicum.explorewithme.main.error.EntityDeletedException;
-import ru.practicum.explorewithme.main.error.EntityNotFoundException;
+import ru.practicum.explorewithme.api.dto.event.CategoryDto;
+import ru.practicum.explorewithme.api.dto.event.NewCategoryDto;
+import ru.practicum.explorewithme.api.exception.EntityDeletedException;
+import ru.practicum.explorewithme.api.exception.EntityNotFoundException;
 import ru.practicum.explorewithme.main.service.CategoryService;
 
 import static org.hamcrest.Matchers.*;
@@ -22,7 +22,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import ru.practicum.explorewithme.main.error.EntityAlreadyExistsException;
+import ru.practicum.explorewithme.api.exception.EntityAlreadyExistsException;
 
 @WebMvcTest(AdminCategoryController.class)
 @DisplayName("Контроллер администрирования категорий должен")

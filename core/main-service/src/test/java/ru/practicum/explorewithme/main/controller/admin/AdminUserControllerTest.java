@@ -10,10 +10,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.explorewithme.main.dto.NewUserRequestDto;
-import ru.practicum.explorewithme.main.dto.UserDto;
-import ru.practicum.explorewithme.main.error.EntityAlreadyExistsException;
-import ru.practicum.explorewithme.main.error.EntityNotFoundException;
+import ru.practicum.explorewithme.api.dto.user.NewUserRequestDto;
+import ru.practicum.explorewithme.api.dto.user.UserDto;
+import ru.practicum.explorewithme.api.exception.EntityAlreadyExistsException;
+import ru.practicum.explorewithme.api.exception.EntityNotFoundException;
 import ru.practicum.explorewithme.main.service.UserService;
 
 import java.util.Arrays;

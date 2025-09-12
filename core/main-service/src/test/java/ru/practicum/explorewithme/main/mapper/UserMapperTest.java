@@ -5,9 +5,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
-import ru.practicum.explorewithme.main.dto.NewUserRequestDto;
-import ru.practicum.explorewithme.main.dto.UserDto;
-import ru.practicum.explorewithme.main.dto.UserShortDto;
+import ru.practicum.explorewithme.api.dto.user.NewUserRequestDto;
+import ru.practicum.explorewithme.api.dto.user.UserDto;
+import ru.practicum.explorewithme.api.dto.user.UserShortDto;
 import ru.practicum.explorewithme.main.model.User;
 
 import static org.assertj.core.api.Assertions.assertThat;

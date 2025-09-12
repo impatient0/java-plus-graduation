@@ -17,10 +17,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.practicum.explorewithme.api.enums.EventState;
+import ru.practicum.explorewithme.api.exception.EntityNotFoundException;
 import ru.practicum.explorewithme.stats.client.aop.StatsHitAspect;
-import ru.practicum.explorewithme.main.dto.EventFullDto;
-import ru.practicum.explorewithme.main.dto.EventShortDto;
-import ru.practicum.explorewithme.main.model.EventState;
+import ru.practicum.explorewithme.api.dto.event.EventFullDto;
+import ru.practicum.explorewithme.api.dto.event.EventShortDto;
 import ru.practicum.explorewithme.main.service.EventService;
 import ru.practicum.explorewithme.main.service.params.PublicEventSearchParams;
 import ru.practicum.explorewithme.stats.client.StatsClient;
@@ -307,7 +308,7 @@ class PublicEventControllerTest {
         void whenServiceThrowsNotFound_shouldStillLogHitAndReturn404() throws Exception {
             Long eventId = 999L;
             when(eventService.getEventByIdPublic(eq(eventId)))
-                .thenThrow(new ru.practicum.explorewithme.main.error.EntityNotFoundException("Event not found"));
+                .thenThrow(new EntityNotFoundException("Event not found"));
 
             mockMvc.perform(get("/events/{eventId}", eventId)
                     .header("X-Real-IP", testIpAddress)

@@ -7,20 +7,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.explorewithme.main.dto.EventFullDto;
-import ru.practicum.explorewithme.main.dto.EventRequestStatusUpdateRequestDto;
-import ru.practicum.explorewithme.main.dto.EventRequestStatusUpdateResultDto;
-import ru.practicum.explorewithme.main.dto.EventShortDto;
-import ru.practicum.explorewithme.main.dto.NewEventDto;
-import ru.practicum.explorewithme.main.dto.UpdateEventUserRequestDto;
-import ru.practicum.explorewithme.main.dto.ParticipationRequestDto;
+import ru.practicum.explorewithme.api.dto.event.EventFullDto;
+import ru.practicum.explorewithme.api.dto.event.EventRequestStatusUpdateRequestDto;
+import ru.practicum.explorewithme.api.dto.event.EventRequestStatusUpdateResultDto;
+import ru.practicum.explorewithme.api.dto.event.EventShortDto;
+import ru.practicum.explorewithme.api.dto.event.NewEventDto;
+import ru.practicum.explorewithme.api.dto.event.UpdateEventUserRequestDto;
+import ru.practicum.explorewithme.api.dto.event.ParticipationRequestDto;
+import ru.practicum.explorewithme.main.mapper.EnumMapper;
 import ru.practicum.explorewithme.main.service.EventService;
 import ru.practicum.explorewithme.main.service.RequestService;
 import ru.practicum.explorewithme.main.service.params.EventRequestStatusUpdateRequestParams;
 
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
-import ru.practicum.explorewithme.main.service.params.EventRequestStatusUpdateRequestParams;
 
 import java.util.List;
 
@@ -33,6 +33,7 @@ public class PrivateEventController {
 
     private final EventService eventService;
     private final RequestService requestService;
+    private final EnumMapper enumMapper;
 
     /**
      * Получение событий, добавленных текущим пользователем.<br>
@@ -146,7 +147,7 @@ public class PrivateEventController {
                 .userId(userId)
                 .eventId(eventId)
                 .requestIds(requestStatusUpdate.getRequestIds())
-                .status(requestStatusUpdate.getStatus())
+                .status(enumMapper.toModelRequestStatus(requestStatusUpdate.getStatus()))
                 .build();
         EventRequestStatusUpdateResultDto result = requestService.updateRequestsStatus(requestParams);
         log.info("Private: Received list requests for event {} when initiator {} : {}", eventId, userId, result);

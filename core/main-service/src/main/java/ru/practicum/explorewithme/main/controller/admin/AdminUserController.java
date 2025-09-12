@@ -1,7 +1,7 @@
 package ru.practicum.explorewithme.main.controller.admin;
 
-import ru.practicum.explorewithme.main.dto.NewUserRequestDto;
-import ru.practicum.explorewithme.main.dto.UserDto;
+import ru.practicum.explorewithme.api.dto.user.NewUserRequestDto;
+import ru.practicum.explorewithme.api.dto.user.UserDto;
 import ru.practicum.explorewithme.main.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;

@@ -20,14 +20,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.explorewithme.main.dto.EventFullDto;
-import ru.practicum.explorewithme.main.dto.EventShortDto;
-import ru.practicum.explorewithme.main.dto.NewEventDto;
-import ru.practicum.explorewithme.main.dto.UpdateEventAdminRequestDto;
-import ru.practicum.explorewithme.main.dto.UpdateEventUserRequestDto;
-import ru.practicum.explorewithme.main.error.BusinessRuleViolationException;
-import ru.practicum.explorewithme.main.error.EntityNotFoundException;
+import ru.practicum.explorewithme.api.dto.event.EventFullDto;
+import ru.practicum.explorewithme.api.dto.event.EventShortDto;
+import ru.practicum.explorewithme.api.dto.event.NewEventDto;
+import ru.practicum.explorewithme.api.dto.event.UpdateEventAdminRequestDto;
+import ru.practicum.explorewithme.api.dto.event.UpdateEventUserRequestDto;
+import ru.practicum.explorewithme.api.exception.BusinessRuleViolationException;
+import ru.practicum.explorewithme.api.exception.EntityNotFoundException;
 import ru.practicum.explorewithme.main.mapper.EventMapper;
+import ru.practicum.explorewithme.main.mapper.LocationMapper;
 import ru.practicum.explorewithme.main.model.Category;
 import ru.practicum.explorewithme.main.model.Event;
 import ru.practicum.explorewithme.main.model.EventState;
@@ -51,6 +52,7 @@ public class EventServiceImpl implements EventService {
 
     private final EventRepository eventRepository;
     private final EventMapper eventMapper;
+    private final LocationMapper locationMapper;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final RequestRepository requestRepository;
@@ -271,7 +273,7 @@ public class EventServiceImpl implements EventService {
             event.setEventDate(requestDto.getEventDate());
         }
         if (requestDto.getLocation() != null) {
-            event.setLocation(requestDto.getLocation());
+            event.setLocation(locationMapper.toLocation(requestDto.getLocation()));
         }
         if (requestDto.getPaid() != null) {
             event.setPaid(requestDto.getPaid());
@@ -370,7 +372,7 @@ public class EventServiceImpl implements EventService {
             event.setEventDate(requestDto.getEventDate());
         }
         if (requestDto.getLocation() != null) {
-            event.setLocation(requestDto.getLocation());
+            event.setLocation(locationMapper.toLocation(requestDto.getLocation()));
         }
         if (requestDto.getPaid() != null) {
             event.setPaid(requestDto.getPaid());

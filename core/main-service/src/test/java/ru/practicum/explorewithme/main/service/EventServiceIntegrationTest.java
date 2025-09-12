@@ -16,13 +16,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import ru.practicum.explorewithme.main.dto.EventFullDto;
-import ru.practicum.explorewithme.main.dto.EventShortDto;
-import ru.practicum.explorewithme.main.dto.NewEventDto;
-import ru.practicum.explorewithme.main.dto.UpdateEventAdminRequestDto;
-import ru.practicum.explorewithme.main.dto.UpdateEventUserRequestDto;
-import ru.practicum.explorewithme.main.error.BusinessRuleViolationException;
-import ru.practicum.explorewithme.main.error.EntityNotFoundException;
+import ru.practicum.explorewithme.api.dto.event.EventFullDto;
+import ru.practicum.explorewithme.api.dto.event.EventShortDto;
+import ru.practicum.explorewithme.api.dto.event.LocationDto;
+import ru.practicum.explorewithme.api.dto.event.NewEventDto;
+import ru.practicum.explorewithme.api.dto.event.UpdateEventAdminRequestDto;
+import ru.practicum.explorewithme.api.dto.event.UpdateEventUserRequestDto;
+import ru.practicum.explorewithme.api.exception.BusinessRuleViolationException;
+import ru.practicum.explorewithme.api.exception.EntityNotFoundException;
 import ru.practicum.explorewithme.main.model.*;
 import ru.practicum.explorewithme.main.repository.CategoryRepository;
 import ru.practicum.explorewithme.main.repository.EventRepository;
@@ -118,8 +119,8 @@ class EventServiceIntegrationTest {
                 .annotation("Valid Annotation")
                 .category(category1.getId())
                 .description("Valid Description")
-                .eventDate(now.plusHours(3))
-                .location(location1)
+                .eventDate(now.plusHours(3)).location(
+                    LocationDto.builder().lat(location1.getLat()).lon(location1.getLon()).build())
                 .paid(false)
                 .participantLimit(10L)
                 .requestModeration(true)
@@ -133,7 +134,7 @@ class EventServiceIntegrationTest {
             assertEquals(newEventDto.getAnnotation(), createdEventDto.getAnnotation());
             assertEquals(user1.getId(), createdEventDto.getInitiator().getId());
             assertEquals(category1.getId(), createdEventDto.getCategory().getId());
-            assertEquals(EventState.PENDING, createdEventDto.getState());
+            assertEquals(EventState.PENDING.name(), createdEventDto.getState().name());
             assertNotNull(createdEventDto.getCreatedOn()); // Проверяем, что дата создания установлена (JPA Auditing)
 
             assertTrue(eventRepository.existsById(createdEventDto.getId()));
@@ -143,8 +144,10 @@ class EventServiceIntegrationTest {
         @DisplayName("Должен выбрасывать EntityNotFoundException, если пользователь не найден")
         void addEventPrivate_whenUserNotFound_thenThrowsEntityNotFoundException() {
             Long nonExistentUserId = 999L;
-            NewEventDto newEventDto = NewEventDto.builder().category(category1.getId()).eventDate(now.plusHours(3))
-                .annotation("A").description("D").title("T").location(location1).build();
+            NewEventDto newEventDto = NewEventDto.builder().category(category1.getId())
+                .eventDate(now.plusHours(3)).annotation("A").description("D").title("T").location(
+                    LocationDto.builder().lat(location1.getLat()).lon(location1.getLon()).build())
+                .build();
 
             assertThrows(EntityNotFoundException.class, () ->
                 eventService.addEventPrivate(nonExistentUserId, newEventDto));
@@ -154,8 +157,10 @@ class EventServiceIntegrationTest {
         @DisplayName("Должен выбрасывать EntityNotFoundException, если категория не найдена")
         void addEventPrivate_whenCategoryNotFound_thenThrowsEntityNotFoundException() {
             Long nonExistentCategoryId = 888L;
-            NewEventDto newEventDto = NewEventDto.builder().category(nonExistentCategoryId).eventDate(now.plusHours(3))
-                .annotation("A").description("D").title("T").location(location1).build();
+            NewEventDto newEventDto = NewEventDto.builder().category(nonExistentCategoryId)
+                .eventDate(now.plusHours(3)).annotation("A").description("D").title("T").location(
+                    LocationDto.builder().lat(location1.getLat()).lon(location1.getLon()).build())
+                .build();
 
             assertThrows(EntityNotFoundException.class, () ->
                 eventService.addEventPrivate(user1.getId(), newEventDto));
@@ -164,8 +169,10 @@ class EventServiceIntegrationTest {
         @Test
         @DisplayName("Должен выбрасывать BusinessRuleViolationException, если дата события слишком ранняя")
         void addEventPrivate_whenEventDateIsTooSoon_thenThrowsBusinessRuleViolationException() {
-            NewEventDto newEventDto = NewEventDto.builder().category(category1.getId()).eventDate(now.plusHours(1))
-                .annotation("A").description("D").title("T").location(location1).build();
+            NewEventDto newEventDto = NewEventDto.builder().category(category1.getId())
+                .eventDate(now.plusHours(1)).annotation("A").description("D").title("T").location(
+                    LocationDto.builder().lat(location1.getLat()).lon(location1.getLon()).build())
+                .build();
 
             assertThrows(BusinessRuleViolationException.class, () ->
                 eventService.addEventPrivate(user1.getId(), newEventDto));
@@ -216,7 +223,7 @@ class EventServiceIntegrationTest {
             AdminEventSearchParams params = AdminEventSearchParams.builder().states(List.of(EventState.PUBLISHED)).build();
             List<EventFullDto> result = eventService.getEventsAdmin(params, 0, 10);
             assertEquals(2, result.size());
-            assertTrue(result.stream().allMatch(e -> e.getState() == EventState.PUBLISHED));
+            assertTrue(result.stream().allMatch(e -> e.getState().name().equals(EventState.PUBLISHED.name())));
         }
 
         @Test

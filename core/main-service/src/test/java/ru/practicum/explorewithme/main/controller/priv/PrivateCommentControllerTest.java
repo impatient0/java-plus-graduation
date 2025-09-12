@@ -10,10 +10,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.explorewithme.main.dto.CommentDto;
-import ru.practicum.explorewithme.main.dto.NewCommentDto;
-import ru.practicum.explorewithme.main.dto.UpdateCommentDto;
-import ru.practicum.explorewithme.main.dto.UserShortDto;
+import ru.practicum.explorewithme.api.dto.comment.CommentDto;
+import ru.practicum.explorewithme.api.dto.comment.NewCommentDto;
+import ru.practicum.explorewithme.api.dto.comment.UpdateCommentDto;
+import ru.practicum.explorewithme.api.dto.user.UserShortDto;
 import ru.practicum.explorewithme.main.service.CommentService;
 
 import java.time.LocalDateTime;
