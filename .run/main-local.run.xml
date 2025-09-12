@@ -4,9 +4,7 @@
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <option name="MAIN_CLASS_NAME" value="ru.practicum.explorewithme.main.MainServiceApplication" />
     <module name="main-service" />
-    <option name="VM_PARAMETERS" value="-Dspring.profiles.active=local" />
-    <method v="2">
-      <option name="RunConfigurationTask" enabled="true" run_configuration_name="main-db" run_configuration_type="docker-deploy" />
-    </method>
+    <option name="VM_PARAMETERS" value="-Dspring.profiles.include=local" />
+    <method v="2" />
   </configuration>
 </component>
