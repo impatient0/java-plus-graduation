@@ -15,7 +15,7 @@ public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPre
 
     boolean existsByCategoryId(Long categoryId);
 
-    boolean existsByIdAndInitiator_Id(Long id, Long initiatorId);
+    boolean existsByIdAndInitiatorId(Long id, Long initiatorId);
 
     Optional<Event> findByIdAndState(Long eventId, EventState state);
 

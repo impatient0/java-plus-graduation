@@ -1,8 +1,8 @@
 package ru.practicum.explorewithme.main.service;
 
-import ru.practicum.explorewithme.api.dto.event.EventRequestStatusUpdateResultDto;
+import ru.practicum.explorewithme.api.client.event.dto.EventRequestStatusUpdateResultDto;
 import jakarta.validation.constraints.Positive;
-import ru.practicum.explorewithme.api.dto.event.ParticipationRequestDto;
+import ru.practicum.explorewithme.api.client.event.dto.ParticipationRequestDto;
 import ru.practicum.explorewithme.main.service.params.EventRequestStatusUpdateRequestParams;
 
 import java.util.List;

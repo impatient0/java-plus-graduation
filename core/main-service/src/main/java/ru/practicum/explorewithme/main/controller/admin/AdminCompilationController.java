@@ -7,9 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.explorewithme.api.dto.event.CompilationDto;
-import ru.practicum.explorewithme.api.dto.event.NewCompilationDto;
-import ru.practicum.explorewithme.api.dto.event.UpdateCompilationRequestDto;
+import ru.practicum.explorewithme.api.client.event.dto.CompilationDto;
+import ru.practicum.explorewithme.api.client.event.dto.NewCompilationDto;
+import ru.practicum.explorewithme.api.client.event.dto.UpdateCompilationRequestDto;
 import ru.practicum.explorewithme.main.service.CompilationService;
 
 @RestController

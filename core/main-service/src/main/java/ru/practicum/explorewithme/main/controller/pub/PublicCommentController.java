@@ -9,7 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.explorewithme.api.dto.comment.CommentDto;
+import ru.practicum.explorewithme.api.client.comment.dto.CommentDto;
 import ru.practicum.explorewithme.main.service.CommentService;
 import ru.practicum.explorewithme.main.service.params.PublicCommentParameters;
 

@@ -20,13 +20,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.explorewithme.api.dto.event.EventFullDto;
-import ru.practicum.explorewithme.api.dto.event.EventShortDto;
-import ru.practicum.explorewithme.api.dto.event.NewEventDto;
-import ru.practicum.explorewithme.api.dto.event.UpdateEventAdminRequestDto;
-import ru.practicum.explorewithme.api.dto.event.UpdateEventUserRequestDto;
+import ru.practicum.explorewithme.api.client.user.UserClient;
+import ru.practicum.explorewithme.api.client.event.dto.EventFullDto;
+import ru.practicum.explorewithme.api.client.event.dto.EventShortDto;
+import ru.practicum.explorewithme.api.client.event.dto.NewEventDto;
+import ru.practicum.explorewithme.api.client.event.dto.UpdateEventAdminRequestDto;
+import ru.practicum.explorewithme.api.client.event.dto.UpdateEventUserRequestDto;
+import ru.practicum.explorewithme.api.client.user.dto.UserDto;
 import ru.practicum.explorewithme.api.exception.BusinessRuleViolationException;
 import ru.practicum.explorewithme.api.exception.EntityNotFoundException;
+import ru.practicum.explorewithme.main.mapper.DtoMapper;
 import ru.practicum.explorewithme.main.mapper.EventMapper;
 import ru.practicum.explorewithme.main.mapper.LocationMapper;
 import ru.practicum.explorewithme.main.model.Category;
@@ -34,11 +37,9 @@ import ru.practicum.explorewithme.main.model.Event;
 import ru.practicum.explorewithme.main.model.EventState;
 import ru.practicum.explorewithme.main.model.QEvent;
 import ru.practicum.explorewithme.main.model.RequestStatus;
-import ru.practicum.explorewithme.main.model.User;
 import ru.practicum.explorewithme.main.repository.CategoryRepository;
 import ru.practicum.explorewithme.main.repository.EventRepository;
 import ru.practicum.explorewithme.main.repository.RequestRepository;
-import ru.practicum.explorewithme.main.repository.UserRepository;
 import ru.practicum.explorewithme.main.service.params.AdminEventSearchParams;
 import ru.practicum.explorewithme.main.service.params.PublicEventSearchParams;
 import ru.practicum.explorewithme.stats.client.StatsClient;
@@ -53,10 +54,11 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final EventMapper eventMapper;
     private final LocationMapper locationMapper;
-    private final UserRepository userRepository;
+    private final UserClient userClient;
     private final CategoryRepository categoryRepository;
     private final RequestRepository requestRepository;
     private final StatsClient statsClient;
+    private final DtoMapper dtoMapper;
 
     private static final long MIN_HOURS_BEFORE_PUBLICATION_FOR_ADMIN = 1;
 
@@ -215,7 +217,7 @@ public class EventServiceImpl implements EventService {
         BooleanBuilder predicate = new BooleanBuilder();
 
         if (users != null && !users.isEmpty()) {
-            predicate.and(qEvent.initiator.id.in(users));
+            predicate.and(qEvent.initiatorId.in(users));
         }
 
         if (states != null && !states.isEmpty()) {
@@ -325,7 +327,9 @@ public class EventServiceImpl implements EventService {
     public List<EventShortDto> getEventsByOwner(Long userId, int from, int size) {
         log.debug("Fetching events for owner (user) id: {}, from: {}, size: {}", userId, from, size);
 
-        if (!userRepository.existsById(userId)) {
+        try {
+            userClient.checkUserExists(userId);
+        } catch (EntityNotFoundException e) {
             return Collections.emptyList(); // По спецификации API, если по заданным фильтрам не найдено ни одного события, возвращается пустой список
         }
 
@@ -410,9 +414,7 @@ public class EventServiceImpl implements EventService {
     public EventFullDto getEventPrivate(Long userId, Long eventId) {
         log.debug("Fetching event id: {} for user id: {}", eventId, userId);
 
-        if (!userRepository.existsById(userId)) {
-            throw new EntityNotFoundException("User with id=" + userId + " not found.");
-        }
+        userClient.checkUserExists(userId);
 
         Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
                 .orElseThrow(() -> new EntityNotFoundException(
@@ -427,8 +429,7 @@ public class EventServiceImpl implements EventService {
     public EventFullDto addEventPrivate(Long userId, NewEventDto newEventDto) {
         log.info("Добавление события {} пользователем {}", newEventDto, userId);
 
-        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("Пользователь " +
-                "с id = " + userId + " не найден"));
+        UserDto initiator = userClient.getUserById(userId);
 
         Long categoryId = newEventDto.getCategory();
         Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new EntityNotFoundException("Категория " +
@@ -440,8 +441,10 @@ public class EventServiceImpl implements EventService {
         }
 
         Event event = eventMapper.toEvent(newEventDto);
-        event.setInitiator(user);
-        return eventMapper.toEventFullDto(eventRepository.save(event));
+        event.setInitiatorId(userId);
+        EventFullDto savedEvent = eventMapper.toEventFullDto(eventRepository.save(event));
+        savedEvent.setInitiator(dtoMapper.toUserShortDto(initiator));
+        return savedEvent;
     }
 
     private Map<Long, Long> getViewsForEvents(List<Event> events) {

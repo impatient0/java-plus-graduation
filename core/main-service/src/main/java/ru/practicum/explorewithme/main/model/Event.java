@@ -17,7 +17,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(exclude = {"category", "initiator", "compilations"})
+@ToString(exclude = {"category", "compilations"})
 @EqualsAndHashCode(of = {"id", "title", "annotation", "eventDate", "publishedOn"})
 @EntityListeners(AuditingEntityListener.class)
 public class Event {
@@ -94,9 +94,8 @@ public class Event {
     /**
      * Инициатор события
      */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "initiator_id", nullable = false)
-    private User initiator;
+    @Column(name = "initiator_id", nullable = false)
+    private Long initiatorId;
 
     /**
      * Местоположение события

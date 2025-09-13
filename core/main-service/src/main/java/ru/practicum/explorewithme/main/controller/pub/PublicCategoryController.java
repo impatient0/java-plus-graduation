@@ -2,7 +2,7 @@ package ru.practicum.explorewithme.main.controller.pub;
 
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
-import ru.practicum.explorewithme.api.dto.event.CategoryDto;
+import ru.practicum.explorewithme.api.client.event.dto.CategoryDto;
 import ru.practicum.explorewithme.main.service.CategoryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;

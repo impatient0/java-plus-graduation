@@ -7,7 +7,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-@EnableFeignClients(basePackages = "ru.practicum.explorewithme.stats.client")
+@EnableFeignClients(basePackages = {"ru.practicum.explorewithme.stats.client", "ru.practicum.explorewithme.api.client.user"})
 public class MainServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(MainServiceApplication.class, args);

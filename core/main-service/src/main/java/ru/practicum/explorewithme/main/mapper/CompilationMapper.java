@@ -3,9 +3,9 @@ package ru.practicum.explorewithme.main.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import ru.practicum.explorewithme.api.dto.event.CompilationDto;
-import ru.practicum.explorewithme.api.dto.event.NewCompilationDto;
-import ru.practicum.explorewithme.api.dto.event.UpdateCompilationRequestDto;
+import ru.practicum.explorewithme.api.client.event.dto.CompilationDto;
+import ru.practicum.explorewithme.api.client.event.dto.NewCompilationDto;
+import ru.practicum.explorewithme.api.client.event.dto.UpdateCompilationRequestDto;
 import ru.practicum.explorewithme.main.model.Compilation;
 
 @Mapper(componentModel = "spring", uses = {EventMapper.class})

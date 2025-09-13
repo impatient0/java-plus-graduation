@@ -12,21 +12,22 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.explorewithme.api.dto.comment.CommentAdminDto;
-import ru.practicum.explorewithme.api.dto.comment.CommentDto;
-import ru.practicum.explorewithme.api.dto.comment.NewCommentDto;
-import ru.practicum.explorewithme.api.dto.comment.UpdateCommentDto;
+import ru.practicum.explorewithme.api.client.comment.dto.CommentAdminDto;
+import ru.practicum.explorewithme.api.client.comment.dto.CommentDto;
+import ru.practicum.explorewithme.api.client.comment.dto.NewCommentDto;
+import ru.practicum.explorewithme.api.client.comment.dto.UpdateCommentDto;
+import ru.practicum.explorewithme.api.client.user.dto.UserDto;
 import ru.practicum.explorewithme.api.exception.BusinessRuleViolationException;
 import ru.practicum.explorewithme.api.exception.EntityNotFoundException;
+import ru.practicum.explorewithme.api.client.user.UserClient;
 import ru.practicum.explorewithme.main.mapper.CommentMapper;
+import ru.practicum.explorewithme.main.mapper.DtoMapper;
 import ru.practicum.explorewithme.main.model.Comment;
 import ru.practicum.explorewithme.main.model.Event;
 import ru.practicum.explorewithme.main.model.EventState;
 import ru.practicum.explorewithme.main.model.QComment;
-import ru.practicum.explorewithme.main.model.User;
 import ru.practicum.explorewithme.main.repository.CommentRepository;
 import ru.practicum.explorewithme.main.repository.EventRepository;
-import ru.practicum.explorewithme.main.repository.UserRepository;
 import ru.practicum.explorewithme.main.service.params.AdminCommentSearchParams;
 import ru.practicum.explorewithme.main.service.params.PublicCommentParameters;
 
@@ -35,10 +36,11 @@ import ru.practicum.explorewithme.main.service.params.PublicCommentParameters;
 @Slf4j
 public class CommentServiceImpl implements CommentService {
 
-    private final UserRepository userRepository;
+    private final UserClient userClient;
     private final CommentRepository commentRepository;
     private final EventRepository eventRepository;
     private final CommentMapper commentMapper;
+    private final DtoMapper dtoMapper;
 
     @Override
     @Transactional(readOnly = true)
@@ -61,9 +63,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional(readOnly = true)
     public List<CommentDto> getUserComments(Long userId, int from, int size) {
-        if (!userRepository.existsById(userId)) {
-            throw new EntityNotFoundException("Пользователь с id " + userId + " не найден");
-        }
+        userClient.checkUserExists(userId);
 
         Sort sort = Sort.by(Sort.Direction.DESC, "createdOn");
         Pageable pageable = PageRequest.of(from / size, size, sort);
@@ -76,8 +76,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public CommentDto addComment(Long userId, Long eventId, NewCommentDto newCommentDto) {
-        User author = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь с id " + userId + " не найден"));
+        UserDto author = userClient.getUserById(userId);
 
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EntityNotFoundException("Событие с id " + eventId + " не найдено"));
@@ -91,10 +90,13 @@ public class CommentServiceImpl implements CommentService {
         }
 
         Comment comment = commentMapper.toComment(newCommentDto);
-        comment.setAuthor(author);
         comment.setEvent(event);
+        comment.setAuthorId(userId);
 
-        return commentMapper.toDto(commentRepository.save(comment));
+        CommentDto savedComment = commentMapper.toDto(commentRepository.save(comment));
+        savedComment.setAuthor(dtoMapper.toUserShortDto(author));
+
+        return savedComment;
     }
 
     @Override
@@ -108,7 +110,7 @@ public class CommentServiceImpl implements CommentService {
 
         Comment existedComment = comment.get();
 
-        if (!existedComment.getAuthor().getId().equals(userId)) {
+        if (!existedComment.getAuthorId().equals(userId)) {
             throw new EntityNotFoundException("Искомый комментарий с id " + commentId + " пользователя с id " + userId + " не найден");
         }
 
@@ -142,7 +144,7 @@ public class CommentServiceImpl implements CommentService {
     public void deleteUserComment(Long userId, Long commentId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Comment with id=%d not found", commentId)));
-        if (!comment.getAuthor().getId().equals(userId)) {
+        if (!comment.getAuthorId().equals(userId)) {
             throw new EntityNotFoundException(String.format("Comment with id=%d not found for user with id=%d", commentId, userId));
         }
         if (!comment.isDeleted()) {
@@ -172,7 +174,7 @@ public class CommentServiceImpl implements CommentService {
         BooleanBuilder predicate = new BooleanBuilder();
 
         if (searchParams.getUserId() != null) {
-            predicate.and(qComment.author.id.eq(searchParams.getUserId()));
+            predicate.and(qComment.authorId.eq(searchParams.getUserId()));
         }
 
         if (searchParams.getEventId() != null) {

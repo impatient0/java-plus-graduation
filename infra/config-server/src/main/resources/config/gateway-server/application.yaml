@@ -30,6 +30,11 @@ spring:
                 name: default-breaker
                 fallbackUri: forward:/service-fallback
           routes:
+            - id: main-service-admin-users-route
+              uri: lb://user-service
+              predicates:
+                - Path=/admin/users/**
+
             - id: main-service-admin-route
               uri: lb://main-service
               predicates:

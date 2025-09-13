@@ -3,15 +3,15 @@ package ru.practicum.explorewithme.main.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.explorewithme.api.dto.event.EventRequestStatusUpdateResultDto;
-import ru.practicum.explorewithme.api.dto.event.ParticipationRequestDto;
+import ru.practicum.explorewithme.api.client.user.UserClient;
+import ru.practicum.explorewithme.api.client.event.dto.EventRequestStatusUpdateResultDto;
+import ru.practicum.explorewithme.api.client.event.dto.ParticipationRequestDto;
 import ru.practicum.explorewithme.api.exception.BusinessRuleViolationException;
 import ru.practicum.explorewithme.api.exception.EntityNotFoundException;
 import ru.practicum.explorewithme.main.mapper.RequestMapper;
 import ru.practicum.explorewithme.main.model.*;
 import ru.practicum.explorewithme.main.repository.EventRepository;
 import ru.practicum.explorewithme.main.repository.RequestRepository;
-import ru.practicum.explorewithme.main.repository.UserRepository;
 import ru.practicum.explorewithme.main.service.params.EventRequestStatusUpdateRequestParams;
 
 import java.util.LinkedHashMap;
@@ -26,7 +26,7 @@ public class RequestServiceImpl implements RequestService {
     private final RequestRepository requestRepository;
     private final RequestMapper requestMapper;
     private final EventRepository eventRepository;
-    private final UserRepository userRepository;
+    private final UserClient userClient;
 
     @Override
     @Transactional
@@ -39,7 +39,7 @@ public class RequestServiceImpl implements RequestService {
     @Override
     @Transactional
     public ParticipationRequestDto cancelRequest(Long userId, Long requestId) {
-        ParticipationRequest result = requestRepository.findByIdAndRequester_Id(requestId, userId)
+        ParticipationRequest result = requestRepository.findByIdAndRequesterId(requestId, userId)
                 .orElseThrow(() ->
                         new EntityNotFoundException("User with Id = " + userId + " and Request", "Id", userId));
         result.setStatus(RequestStatus.CANCELED);
@@ -50,9 +50,8 @@ public class RequestServiceImpl implements RequestService {
     @Override
     @Transactional(readOnly = true)
     public List<ParticipationRequestDto> getRequests(Long userId) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User", "Id", userId));
-        return requestRepository.findByRequester_Id(userId).stream()
+        userClient.checkUserExists(userId);
+        return requestRepository.findByRequesterId(userId).stream()
                 .sorted(Comparator.comparing(ParticipationRequest::getCreated).reversed())
                 .map(requestMapper::toRequestDto).toList();
     }
@@ -60,7 +59,7 @@ public class RequestServiceImpl implements RequestService {
     @Override
     @Transactional(readOnly = true)
     public List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId) {
-        if (!eventRepository.existsByIdAndInitiator_Id(eventId, userId))
+        if (!eventRepository.existsByIdAndInitiatorId(eventId, userId))
             throw new EntityNotFoundException("Event with Id = " + eventId + " when initiator", "Id", userId);
         return requestRepository.findByEvent_Id(eventId).stream()
                 .sorted(Comparator.comparing(ParticipationRequest::getCreated).reversed())
@@ -79,7 +78,7 @@ public class RequestServiceImpl implements RequestService {
         }
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EntityNotFoundException("Event", "Id", eventId));
-        if (!event.getInitiator().getId().equals(userId)) {
+        if (!event.getInitiatorId().equals(userId)) {
             throw new EntityNotFoundException("Event with Id = " + eventId + " when initiator", "Id", userId);
         }
         if (!event.isRequestModeration() || event.getParticipantLimit() == 0) {
@@ -142,14 +141,13 @@ public class RequestServiceImpl implements RequestService {
     }
 
     private ParticipationRequest checkRequest(Long userId, Long requestEventId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User", "Id", userId));
+        userClient.checkUserExists(userId);
         Event event = eventRepository.findById(requestEventId)
                 .orElseThrow(() -> new EntityNotFoundException("Event", "Id", requestEventId));
-        if (requestRepository.existsByEvent_IdAndRequester_Id(requestEventId, userId)) {
+        if (requestRepository.existsByEvent_IdAndRequesterId(requestEventId, userId)) {
             throw new BusinessRuleViolationException("User has already requested for this event");
         }
-        if (event.getInitiator().getId().equals(userId)) {
+        if (event.getInitiatorId().equals(userId)) {
             throw new BusinessRuleViolationException("User cannot participate in his own event");
         }
         if (event.getState() != EventState.PUBLISHED) {
@@ -161,7 +159,7 @@ public class RequestServiceImpl implements RequestService {
             throw new BusinessRuleViolationException("Event participant limit reached");
         }
         ParticipationRequest newRequest = new ParticipationRequest();
-        newRequest.setRequester(user);
+        newRequest.setRequesterId(userId);
         newRequest.setEvent(event);
         if (!event.isRequestModeration() || event.getParticipantLimit() == 0) {
             newRequest.setStatus(RequestStatus.CONFIRMED);

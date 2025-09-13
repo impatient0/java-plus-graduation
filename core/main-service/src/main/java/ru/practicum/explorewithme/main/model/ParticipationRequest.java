@@ -16,7 +16,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(exclude = {"requester", "event"})
+@ToString(exclude = {"event"})
 @EqualsAndHashCode(of = {"id", "created"})
 @EntityListeners(AuditingEntityListener.class)
 public class ParticipationRequest {
@@ -35,9 +35,8 @@ public class ParticipationRequest {
     /**
      * Пользователь, создавший запрос на участие
      */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "requester_id", nullable = false)
-    private User requester;
+    @Column(name = "requester_id", nullable = false)
+    private Long requesterId;
 
     /**
      * Событие, на которое пользователь хочет попасть

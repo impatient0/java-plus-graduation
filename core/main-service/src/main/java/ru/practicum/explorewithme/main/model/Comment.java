@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(exclude = {"author", "event"})
+@ToString(exclude = {"event"})
 @EqualsAndHashCode(of = {"id"})
 @EntityListeners(AuditingEntityListener.class)
 public class Comment {
@@ -52,10 +52,8 @@ public class Comment {
     /**
      * Автор комментария.
      */
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "author_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private User author;
+    @Column(name = "author_id", nullable = false)
+    private Long authorId;
 
     /**
      * Событие, к которому относится комментарий.

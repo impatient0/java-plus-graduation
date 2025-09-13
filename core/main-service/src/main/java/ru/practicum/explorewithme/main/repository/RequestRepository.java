@@ -15,13 +15,13 @@ import java.util.Optional;
 @Repository
 public interface RequestRepository extends JpaRepository<ParticipationRequest, Long> {
 
-    boolean existsByEvent_IdAndRequester_Id(Long requestEventId, Long userId);
+    boolean existsByEvent_IdAndRequesterId(Long requestEventId, Long userId);
 
     int countByEvent_IdAndStatusEquals(Long eventId, RequestStatus status);
 
-    List<ParticipationRequest> findByRequester_Id(Long userId);
+    List<ParticipationRequest> findByRequesterId(Long userId);
 
-    Optional<ParticipationRequest> findByIdAndRequester_Id(Long requestId, Long userId);
+    Optional<ParticipationRequest> findByIdAndRequesterId(Long requestId, Long userId);
 
     List<ParticipationRequest> findAllByIdIn(List<Long> requestIdsForUpdate);
 

@@ -1,22 +1,18 @@
-package ru.practicum.explorewithme.main.service;
-
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.explorewithme.api.dto.user.NewUserRequestDto;
-import ru.practicum.explorewithme.api.dto.user.UserDto;
-import ru.practicum.explorewithme.api.exception.EntityAlreadyExistsException;
-import ru.practicum.explorewithme.api.exception.EntityNotFoundException;
-import ru.practicum.explorewithme.main.mapper.UserMapper;
-import ru.practicum.explorewithme.main.model.User;
-import ru.practicum.explorewithme.main.repository.UserRepository;
-import ru.practicum.explorewithme.main.service.params.GetListUsersParameters;
+package ru.practicum.explorewithme.user.application;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.explorewithme.api.client.user.dto.NewUserRequestDto;
+import ru.practicum.explorewithme.api.client.user.dto.UserDto;
+import ru.practicum.explorewithme.api.exception.EntityAlreadyExistsException;
+import ru.practicum.explorewithme.api.exception.EntityNotFoundException;
+import ru.practicum.explorewithme.user.domain.User;
+import ru.practicum.explorewithme.user.domain.UserRepository;
+import ru.practicum.explorewithme.user.infrastructure.UserMapper;
 
 @Service
 @RequiredArgsConstructor
@@ -53,22 +49,47 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public List<UserDto> getUsers(GetListUsersParameters parameters) {
 
-        Pageable pageable = PageRequest.of(parameters.getFrom() / parameters.getSize(),
-                parameters.getSize());
-
         List<UserDto> result;
 
         if (parameters.getIds() == null || parameters.getIds().isEmpty()) {
-            result = userRepository.findAll(pageable).stream()
+            result = userRepository.findAll(parameters.getFrom(), parameters.getSize()).stream()
                     .map(userMapper::toUserDto)
                     .collect(Collectors.toList());
         } else {
-            result = userRepository.findAllByIdIn(parameters.getIds(), pageable).stream()
+            result = userRepository.findAllByIdIn(parameters.getIds(), parameters.getFrom(),
+                    parameters.getSize()).stream()
                     .map(userMapper::toUserDto)
                     .collect(Collectors.toList());
         }
 
         return result;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserDto> getUsersByIds(List<Long> ids) {
+
+        if (ids == null || ids.isEmpty()) {
+            return List.of();
+        }
+
+        return userRepository.findByIdIn(ids).stream().map(userMapper::toUserDto)
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public void checkUserExists(Long userId) {
+
+        if (userId == null || !userRepository.existsById(userId)) {
+            throw new EntityNotFoundException("User", "Id", userId);
+        }
+    }
+
+    @Override
+    public UserDto getUser(Long userId) {
+
+        return userMapper.toUserDto(userRepository.findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException("User", "Id", userId)));
     }
 
 }

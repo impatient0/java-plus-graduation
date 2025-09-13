@@ -1,4 +1,4 @@
-package ru.practicum.explorewithme.api.enums;
+package ru.practicum.explorewithme.api.client.event.enums;
 
 /**
  * Состояния жизненного цикла события

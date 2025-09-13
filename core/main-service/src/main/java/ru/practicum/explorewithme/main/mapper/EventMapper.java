@@ -4,24 +4,25 @@ import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
-import ru.practicum.explorewithme.api.dto.event.EventFullDto;
-import ru.practicum.explorewithme.api.dto.event.EventShortDto;
-import ru.practicum.explorewithme.api.dto.event.NewEventDto;
+import ru.practicum.explorewithme.api.client.event.dto.EventFullDto;
+import ru.practicum.explorewithme.api.client.event.dto.EventShortDto;
+import ru.practicum.explorewithme.api.client.event.dto.NewEventDto;
 import ru.practicum.explorewithme.main.model.Event;
 
-@Mapper(componentModel = "spring", uses = {CategoryMapper.class, UserMapper.class, LocationMapper.class, EnumMapper.class})
+@Mapper(componentModel = "spring", uses = {CategoryMapper.class, LocationMapper.class, EnumMapper.class})
 public interface EventMapper {
 
     @Mappings({
         @Mapping(source = "confirmedRequestsCount", target = "confirmedRequests"),
-        @Mapping(target = "views", ignore = true)
+        @Mapping(target = "views", ignore = true),
+        @Mapping(target = "initiator", ignore = true)
     })
     EventFullDto toEventFullDto(Event event);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "publishedOn", ignore = true)
     @Mapping(target = "compilations", ignore = true)
-    @Mapping(target = "initiator", ignore = true)
+    @Mapping(target = "initiatorId", ignore = true)
     @Mapping(target = "createdOn", ignore = true)
     @Mapping(target = "confirmedRequestsCount", ignore = true)
     @Mapping(target = "state", expression = "java(ru.practicum.explorewithme.main.model.EventState.PENDING)")
