@@ -1,4 +1,4 @@
-package ru.practicum.explorewithme.common.constants;
+package ru.practicum.explorewithme.api.constants;
 
 import java.time.format.DateTimeFormatter;
 

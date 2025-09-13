@@ -1,4 +1,4 @@
-package ru.practicum.explorewithme.api.exception;
+package ru.practicum.explorewithme.api.error;
 
 public class EntityDeletedException  extends RuntimeException {
 

@@ -67,9 +67,8 @@
     </dependency>
     <dependency>
       <groupId>ru.practicum</groupId>
-      <artifactId>ewm-common</artifactId>
+      <artifactId>interaction-api</artifactId>
       <version>${project.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>

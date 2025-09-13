@@ -2,7 +2,7 @@ package ru.practicum.explorewithme.api.client.user;
 
 import feign.Response;
 import feign.codec.ErrorDecoder;
-import ru.practicum.explorewithme.api.exception.EntityNotFoundException;
+import ru.practicum.explorewithme.api.error.EntityNotFoundException;
 
 public class UserClientErrorDecoder implements ErrorDecoder {
 

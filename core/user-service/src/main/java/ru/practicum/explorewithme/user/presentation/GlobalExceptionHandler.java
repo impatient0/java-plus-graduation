@@ -1,26 +1,18 @@
 package ru.practicum.explorewithme.user.presentation;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import ru.practicum.explorewithme.api.exception.BusinessRuleViolationException;
-import ru.practicum.explorewithme.api.exception.EntityAlreadyExistsException;
-import ru.practicum.explorewithme.api.exception.EntityDeletedException;
-import ru.practicum.explorewithme.api.exception.EntityNotFoundException;
-import ru.practicum.explorewithme.common.error.AbstractExceptionHandler;
-import ru.practicum.explorewithme.common.error.ApiError;
+import ru.practicum.explorewithme.api.error.BusinessRuleViolationException;
+import ru.practicum.explorewithme.api.error.EntityAlreadyExistsException;
+import ru.practicum.explorewithme.api.error.EntityDeletedException;
+import ru.practicum.explorewithme.api.error.EntityNotFoundException;
+import ru.practicum.explorewithme.api.error.AbstractExceptionHandler;
+import ru.practicum.explorewithme.api.error.ApiError;
 
 @RestControllerAdvice
 @Slf4j
@@ -99,4 +91,3 @@ public class GlobalExceptionHandler extends AbstractExceptionHandler {
                 .build();
     }
 }
-

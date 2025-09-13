@@ -7,11 +7,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.explorewithme.api.client.event.dto.CategoryDto;
 import ru.practicum.explorewithme.api.client.event.dto.NewCategoryDto;
-import ru.practicum.explorewithme.api.exception.EntityAlreadyExistsException;
-import ru.practicum.explorewithme.api.exception.EntityDeletedException;
+import ru.practicum.explorewithme.api.error.EntityAlreadyExistsException;
+import ru.practicum.explorewithme.api.error.EntityDeletedException;
 import ru.practicum.explorewithme.main.mapper.CategoryMapper;
 import ru.practicum.explorewithme.main.model.Category;
-import ru.practicum.explorewithme.api.exception.EntityNotFoundException;
+import ru.practicum.explorewithme.api.error.EntityNotFoundException;
 import ru.practicum.explorewithme.main.repository.CategoryRepository;
 import ru.practicum.explorewithme.main.repository.EventRepository;
 

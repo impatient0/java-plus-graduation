@@ -17,7 +17,7 @@ import ru.practicum.explorewithme.main.service.params.PublicEventSearchParams;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static ru.practicum.explorewithme.common.constants.DateTimeConstants.DATE_TIME_FORMAT_PATTERN;
+import static ru.practicum.explorewithme.api.constants.DateTimeConstants.DATE_TIME_FORMAT_PATTERN;
 
 @RestController
 @RequestMapping("/events")

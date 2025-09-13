@@ -1,4 +1,4 @@
-package ru.practicum.explorewithme.common.error;
+package ru.practicum.explorewithme.api.error;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
