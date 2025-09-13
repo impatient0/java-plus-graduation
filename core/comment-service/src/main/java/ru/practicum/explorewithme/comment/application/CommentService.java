@@ -1,13 +1,10 @@
-package ru.practicum.explorewithme.main.service;
+package ru.practicum.explorewithme.comment.application;
 
+import java.util.List;
 import ru.practicum.explorewithme.api.client.comment.dto.CommentAdminDto;
 import ru.practicum.explorewithme.api.client.comment.dto.CommentDto;
 import ru.practicum.explorewithme.api.client.comment.dto.NewCommentDto;
 import ru.practicum.explorewithme.api.client.comment.dto.UpdateCommentDto;
-import ru.practicum.explorewithme.main.service.params.AdminCommentSearchParams;
-import ru.practicum.explorewithme.main.service.params.PublicCommentParameters;
-
-import java.util.List;
 
 public interface CommentService {
 

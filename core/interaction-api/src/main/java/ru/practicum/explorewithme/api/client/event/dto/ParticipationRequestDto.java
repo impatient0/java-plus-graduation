@@ -11,7 +11,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import ru.practicum.explorewithme.api.client.event.enums.RequestStatus;
+import ru.practicum.explorewithme.api.client.request.enums.RequestStatus;
 
 
 @Data

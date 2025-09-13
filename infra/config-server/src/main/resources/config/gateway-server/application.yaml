@@ -30,6 +30,24 @@ spring:
                 name: default-breaker
                 fallbackUri: forward:/service-fallback
           routes:
+            - id: comment-service-admin-route
+              uri: lb://comment-service
+              predicates:
+                - Path=/admin/comments/**
+              order: 0
+
+            - id: comment-service-user-route
+              uri: lb://comment-service
+              predicates:
+                - Path=/users/{userId}/comments/**
+              order: 0
+
+            - id: comment-service-event-route
+              uri: lb://comment-service
+              predicates:
+                - Path=/events/{eventId}/comments/**
+              order: 0
+
             - id: main-service-admin-users-route
               uri: lb://user-service
               predicates:

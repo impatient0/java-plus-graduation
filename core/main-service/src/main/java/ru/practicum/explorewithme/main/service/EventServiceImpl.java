@@ -29,7 +29,7 @@ import ru.practicum.explorewithme.api.client.event.dto.UpdateEventUserRequestDto
 import ru.practicum.explorewithme.api.client.user.dto.UserDto;
 import ru.practicum.explorewithme.api.error.BusinessRuleViolationException;
 import ru.practicum.explorewithme.api.error.EntityNotFoundException;
-import ru.practicum.explorewithme.main.mapper.DtoMapper;
+import ru.practicum.explorewithme.api.utility.DtoMapper;
 import ru.practicum.explorewithme.main.mapper.EventMapper;
 import ru.practicum.explorewithme.main.mapper.LocationMapper;
 import ru.practicum.explorewithme.main.model.Category;
@@ -483,5 +483,15 @@ public class EventServiceImpl implements EventService {
             log.error("Failed to retrieve views for multiple events. Error: {}", e.getMessage());
         }
         return viewsMap;
+    }
+
+    public EventFullDto getEventById(Long eventId) {
+
+        if (eventId == null ) {
+            throw new EntityNotFoundException("Event", "Id", null);
+        }
+
+        return eventMapper.toEventFullDto(eventRepository.findById(eventId)
+            .orElseThrow(() -> new EntityNotFoundException("Event", "Id", eventId)));
     }
 }

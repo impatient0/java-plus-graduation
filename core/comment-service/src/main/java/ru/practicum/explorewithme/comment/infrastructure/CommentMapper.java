@@ -1,14 +1,13 @@
-package ru.practicum.explorewithme.main.mapper;
+package ru.practicum.explorewithme.comment.infrastructure;
 
+import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
-import ru.practicum.explorewithme.api.client.comment.dto.CommentAdminDto; // <<< Новый импорт
+import ru.practicum.explorewithme.api.client.comment.dto.CommentAdminDto;
 import ru.practicum.explorewithme.api.client.comment.dto.CommentDto;
 import ru.practicum.explorewithme.api.client.comment.dto.NewCommentDto;
-import ru.practicum.explorewithme.main.model.Comment;
-
-import java.util.List;
+import ru.practicum.explorewithme.comment.domain.Comment;
 
 @Mapper(componentModel = "spring")
 public interface CommentMapper {
@@ -23,7 +22,7 @@ public interface CommentMapper {
         @Mapping(target = "createdOn", ignore = true),
         @Mapping(target = "updatedOn", ignore = true),
         @Mapping(target = "authorId", ignore = true),
-        @Mapping(target = "event", ignore = true),
+        @Mapping(target = "eventId", ignore = true),
         @Mapping(target = "isEdited", ignore = true),
         @Mapping(target = "isDeleted", ignore = true)
     })
@@ -36,7 +35,6 @@ public interface CommentMapper {
      * Поле isDeleted не включается.
      */
     @Mappings({
-        @Mapping(source = "event.id", target = "eventId"),
         @Mapping(source = "edited", target = "isEdited"),
         @Mapping(target = "author", ignore = true)
     })
@@ -49,7 +47,6 @@ public interface CommentMapper {
      * Включает поле isDeleted.
      */
     @Mappings({
-        @Mapping(source = "event.id", target = "eventId"),
         @Mapping(source = "edited", target = "isEdited"),
         @Mapping(source = "deleted", target = "isDeleted"),
         @Mapping(target = "author", ignore = true)

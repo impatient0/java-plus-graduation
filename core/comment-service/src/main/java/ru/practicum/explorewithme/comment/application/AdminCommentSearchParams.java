@@ -1,4 +1,4 @@
-package ru.practicum.explorewithme.main.service.params;
+package ru.practicum.explorewithme.comment.application;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

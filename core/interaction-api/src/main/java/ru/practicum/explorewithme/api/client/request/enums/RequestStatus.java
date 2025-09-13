@@ -1,4 +1,4 @@
-package ru.practicum.explorewithme.api.client.event.enums;
+package ru.practicum.explorewithme.api.client.request.enums;
 
 /**
  * Статусы запросов на участие в событии

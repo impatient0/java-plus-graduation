@@ -1,6 +1,9 @@
-package ru.practicum.explorewithme.main.service.params;
+package ru.practicum.explorewithme.comment.application;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import org.springframework.data.domain.Sort;
 
 @Getter

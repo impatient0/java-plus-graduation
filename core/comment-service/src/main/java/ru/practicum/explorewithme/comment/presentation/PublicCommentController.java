@@ -1,19 +1,23 @@
-package ru.practicum.explorewithme.main.controller.pub;
+package ru.practicum.explorewithme.comment.presentation;
 
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.explorewithme.api.client.comment.dto.CommentDto;
-import ru.practicum.explorewithme.main.service.CommentService;
-import ru.practicum.explorewithme.main.service.params.PublicCommentParameters;
-
-import java.util.List;
+import ru.practicum.explorewithme.comment.application.CommentService;
+import ru.practicum.explorewithme.comment.application.PublicCommentParameters;
 
 @RestController
 @RequestMapping("/events/{eventId}/comments")

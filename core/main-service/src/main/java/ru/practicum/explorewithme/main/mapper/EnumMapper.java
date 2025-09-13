@@ -2,7 +2,7 @@ package ru.practicum.explorewithme.main.mapper;
 
 import org.mapstruct.Mapper;
 import ru.practicum.explorewithme.api.client.event.enums.EventState;
-import ru.practicum.explorewithme.api.client.event.enums.RequestStatus;
+import ru.practicum.explorewithme.api.client.request.enums.RequestStatus;
 
 @Mapper(componentModel = "spring")
 public class EnumMapper {

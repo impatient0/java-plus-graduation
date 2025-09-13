@@ -88,6 +88,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto getUser(Long userId) {
 
+        if (userId == null) {
+            throw new EntityNotFoundException("User", "Id", null);
+        }
+
         return userMapper.toUserDto(userRepository.findById(userId)
             .orElseThrow(() -> new EntityNotFoundException("User", "Id", userId)));
     }

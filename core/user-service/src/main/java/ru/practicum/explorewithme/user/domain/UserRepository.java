@@ -3,10 +3,6 @@ package ru.practicum.explorewithme.user.domain;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * An interface for a user repository, defined in the domain layer.
- * This defines the contract for any persistence-layer implementation.
- */
 public interface UserRepository {
 
     /**

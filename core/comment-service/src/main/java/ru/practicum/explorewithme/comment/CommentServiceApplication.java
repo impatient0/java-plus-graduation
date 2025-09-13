@@ -1,4 +1,4 @@
-package ru.practicum.explorewithme.main;
+package ru.practicum.explorewithme.comment;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,11 +9,12 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @EnableDiscoveryClient
 @EnableFeignClients(basePackages = {
     "ru.practicum.explorewithme.stats.client",
-    "ru.practicum.explorewithme.api.client.user"
+    "ru.practicum.explorewithme.api.client.user",
+    "ru.practicum.explorewithme.api.client.event"
 })
-public class MainServiceApplication {
+public class CommentServiceApplication {
     public static void main(String[] args) {
-        SpringApplication.run(MainServiceApplication.class, args);
+        SpringApplication.run(CommentServiceApplication.class, args);
     }
 
 }

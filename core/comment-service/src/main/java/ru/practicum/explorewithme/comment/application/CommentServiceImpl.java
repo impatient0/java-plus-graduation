@@ -1,35 +1,32 @@
-package ru.practicum.explorewithme.main.service;
+package ru.practicum.explorewithme.comment.application;
 
-import com.querydsl.core.BooleanBuilder;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.explorewithme.api.client.comment.dto.CommentAdminDto;
 import ru.practicum.explorewithme.api.client.comment.dto.CommentDto;
 import ru.practicum.explorewithme.api.client.comment.dto.NewCommentDto;
 import ru.practicum.explorewithme.api.client.comment.dto.UpdateCommentDto;
+import ru.practicum.explorewithme.api.client.event.EventClient;
+import ru.practicum.explorewithme.api.client.event.dto.EventFullDto;
+import ru.practicum.explorewithme.api.client.event.enums.EventState;
+import ru.practicum.explorewithme.api.client.user.UserClient;
 import ru.practicum.explorewithme.api.client.user.dto.UserDto;
+import ru.practicum.explorewithme.api.client.user.dto.UserShortDto;
 import ru.practicum.explorewithme.api.error.BusinessRuleViolationException;
 import ru.practicum.explorewithme.api.error.EntityNotFoundException;
-import ru.practicum.explorewithme.api.client.user.UserClient;
-import ru.practicum.explorewithme.main.mapper.CommentMapper;
-import ru.practicum.explorewithme.main.mapper.DtoMapper;
-import ru.practicum.explorewithme.main.model.Comment;
-import ru.practicum.explorewithme.main.model.Event;
-import ru.practicum.explorewithme.main.model.EventState;
-import ru.practicum.explorewithme.main.model.QComment;
-import ru.practicum.explorewithme.main.repository.CommentRepository;
-import ru.practicum.explorewithme.main.repository.EventRepository;
-import ru.practicum.explorewithme.main.service.params.AdminCommentSearchParams;
-import ru.practicum.explorewithme.main.service.params.PublicCommentParameters;
+import ru.practicum.explorewithme.api.utility.DtoMapper;
+import ru.practicum.explorewithme.comment.domain.Comment;
+import ru.practicum.explorewithme.comment.domain.CommentRepository;
+import ru.practicum.explorewithme.comment.infrastructure.CommentMapper;
 
 @Service
 @RequiredArgsConstructor
@@ -38,26 +35,30 @@ public class CommentServiceImpl implements CommentService {
 
     private final UserClient userClient;
     private final CommentRepository commentRepository;
-    private final EventRepository eventRepository;
+    private final EventClient eventClient;
     private final CommentMapper commentMapper;
     private final DtoMapper dtoMapper;
 
     @Override
     @Transactional(readOnly = true)
     public List<CommentDto> getCommentsForEvent(Long eventId, PublicCommentParameters parameters) {
-        Event event = eventRepository.findByIdAndState(eventId, EventState.PUBLISHED)
-                .orElseThrow(() -> new EntityNotFoundException("Published event", "Id", eventId));
+        EventFullDto event = eventClient.getEventById(eventId);
 
+        if (event.getState() != EventState.PUBLISHED) {
+            throw new EntityNotFoundException("Published event", "Id", eventId);
+        }
         if (!event.isCommentsEnabled()) {
             return List.of();
         }
 
-        Pageable pageable = PageRequest.of(parameters.getFrom() / parameters.getSize(),
-                parameters.getSize(), parameters.getSort());
+        List<Comment> result = commentRepository.findForEvent(
+            eventId,
+            parameters.getFrom(),
+            parameters.getSize(),
+            parameters.getSort()
+        );
 
-        List<Comment> result = commentRepository.findByEventIdAndIsDeletedFalse(eventId, pageable).getContent();
-
-        return commentMapper.toDtoList(result);
+        return enrichCommentsWithAuthors(result);
     }
 
     @Override
@@ -65,12 +66,13 @@ public class CommentServiceImpl implements CommentService {
     public List<CommentDto> getUserComments(Long userId, int from, int size) {
         userClient.checkUserExists(userId);
 
-        Sort sort = Sort.by(Sort.Direction.DESC, "createdOn");
-        Pageable pageable = PageRequest.of(from / size, size, sort);
+        List<Comment> result = commentRepository.findForAuthor(
+            userId,
+            from,
+            size
+        );
 
-        List<Comment> result = commentRepository.findByAuthorIdAndIsDeletedFalse(userId, pageable).getContent();
-
-        return commentMapper.toDtoList(result);
+        return enrichCommentsWithAuthors(result);
     }
 
     @Override
@@ -78,8 +80,7 @@ public class CommentServiceImpl implements CommentService {
     public CommentDto addComment(Long userId, Long eventId, NewCommentDto newCommentDto) {
         UserDto author = userClient.getUserById(userId);
 
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new EntityNotFoundException("Событие с id " + eventId + " не найдено"));
+        EventFullDto event = eventClient.getEventById(eventId);
 
         if (!event.getState().equals(EventState.PUBLISHED)) {
             throw new BusinessRuleViolationException("Событие еще не опубликовано");
@@ -90,13 +91,12 @@ public class CommentServiceImpl implements CommentService {
         }
 
         Comment comment = commentMapper.toComment(newCommentDto);
-        comment.setEvent(event);
+        comment.setEventId(eventId);
         comment.setAuthorId(userId);
 
-        CommentDto savedComment = commentMapper.toDto(commentRepository.save(comment));
-        savedComment.setAuthor(dtoMapper.toUserShortDto(author));
+        Comment savedComment = commentRepository.save(comment);
 
-        return savedComment;
+        return enrichCommentsWithAuthors(List.of(savedComment)).getFirst();
     }
 
     @Override
@@ -125,7 +125,8 @@ public class CommentServiceImpl implements CommentService {
         existedComment.setText(updateCommentDto.getText());
         existedComment.setEdited(true);
 
-        return commentMapper.toDto(commentRepository.saveAndFlush(existedComment));
+        Comment updatedComment = commentRepository.save(existedComment);
+        return enrichCommentsWithAuthors(List.of(updatedComment)).getFirst();
     }
 
     @Override
@@ -160,9 +161,9 @@ public class CommentServiceImpl implements CommentService {
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Comment with id=%d not found", commentId)));
         if (comment.isDeleted()) {
             comment.setDeleted(false);
-            commentRepository.save(comment);
+            comment = commentRepository.save(comment);
         }
-        return commentMapper.toAdminDto(comment);
+        return enrichCommentsWithAuthorsAdmin(List.of(comment)).getFirst();
     }
 
     @Override
@@ -170,27 +171,56 @@ public class CommentServiceImpl implements CommentService {
     public List<CommentAdminDto> getAllCommentsAdmin(AdminCommentSearchParams searchParams, int from, int size) {
         log.debug("Admin: Searching all comments with params: {}, from={}, size={}", searchParams, from, size);
 
-        QComment qComment = QComment.comment;
-        BooleanBuilder predicate = new BooleanBuilder();
+        List<Comment> commentList = commentRepository.findAllAdmin(searchParams, from, size);
 
-        if (searchParams.getUserId() != null) {
-            predicate.and(qComment.authorId.eq(searchParams.getUserId()));
+        log.debug("Admin: Found {} comments for the given criteria.", commentList.size());
+        return enrichCommentsWithAuthorsAdmin(commentList);
+    }
+
+    private List<CommentDto> enrichCommentsWithAuthors(List<Comment> comments) {
+        if (comments == null || comments.isEmpty()) {
+            return List.of();
         }
 
-        if (searchParams.getEventId() != null) {
-            predicate.and(qComment.event.id.eq(searchParams.getEventId()));
+        Set<Long> authorIds = comments.stream()
+            .map(Comment::getAuthorId)
+            .collect(Collectors.toSet());
+
+        Map<Long, UserShortDto> authorMap = userClient.getUsersByIds(new ArrayList<>(authorIds))
+            .stream()
+            .collect(Collectors.toMap(UserDto::getId, dtoMapper::toUserShortDto));
+
+        return comments.stream().map(comment -> {
+            CommentDto commentDto = commentMapper.toDto(comment);
+            commentDto.setAuthor(authorMap.getOrDefault(comment.getAuthorId(), createUnknownUserDto()));
+            return commentDto;
+        }).collect(Collectors.toList());
+    }
+
+    private List<CommentAdminDto> enrichCommentsWithAuthorsAdmin(List<Comment> comments) {
+        if (comments == null || comments.isEmpty()) {
+            return List.of();
         }
 
-        if (searchParams.getIsDeleted() != null) {
-            predicate.and(qComment.isDeleted.eq(searchParams.getIsDeleted()));
-        }
+        Set<Long> authorIds = comments.stream()
+            .map(Comment::getAuthorId)
+            .collect(Collectors.toSet());
 
-        Pageable pageable = PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "createdOn"));
+        Map<Long, UserShortDto> authorMap = userClient.getUsersByIds(new ArrayList<>(authorIds))
+            .stream()
+            .collect(Collectors.toMap(UserDto::getId, dtoMapper::toUserShortDto));
 
-        Page<Comment> commentPage = commentRepository.findAll(predicate, pageable);
+        return comments.stream().map(comment -> {
+            CommentAdminDto adminDto = commentMapper.toAdminDto(comment);
+            adminDto.setAuthor(authorMap.getOrDefault(comment.getAuthorId(), createUnknownUserDto()));
+            return adminDto;
+        }).collect(Collectors.toList());
+    }
 
-        List<CommentAdminDto> result = commentMapper.toAdminDtoList(commentPage.getContent());
-        log.debug("Admin: Found {} comments for the given criteria.", result.size());
-        return result;
+    private UserShortDto createUnknownUserDto() {
+        UserShortDto unknownUser = new UserShortDto();
+        unknownUser.setId(0L);
+        unknownUser.setName("Unknown User");
+        return unknownUser;
     }
 }
