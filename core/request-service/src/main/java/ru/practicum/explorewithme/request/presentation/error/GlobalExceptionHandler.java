@@ -1,4 +1,4 @@
-package ru.practicum.explorewithme.event.presentation.error;
+package ru.practicum.explorewithme.request.presentation.error;
 
 import java.time.LocalDateTime;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +11,6 @@ import ru.practicum.explorewithme.api.error.ApiError;
 import ru.practicum.explorewithme.api.error.BaseExceptionHandler;
 import ru.practicum.explorewithme.api.error.BusinessRuleViolationException;
 import ru.practicum.explorewithme.api.error.EntityAlreadyExistsException;
-import ru.practicum.explorewithme.api.error.EntityDeletedException;
 import ru.practicum.explorewithme.api.error.EntityNotFoundException;
 
 @RestControllerAdvice
@@ -19,7 +18,7 @@ import ru.practicum.explorewithme.api.error.EntityNotFoundException;
 public class GlobalExceptionHandler extends BaseExceptionHandler {
 
     /**
-     * Handles exceptions when a required entity (Event, Category, Compilation, User) is not found.
+     * Handles exceptions when a required entity (Request, User, Event) is not found.
      * <br>
      * Maps to HTTP 404 Not Found.
      */
@@ -36,7 +35,8 @@ public class GlobalExceptionHandler extends BaseExceptionHandler {
     }
 
     /**
-     * Handles exceptions when trying to create an entity (Category, Compilation) with a name/title that already exists.
+     * Handles exceptions when a user tries to create a participation request for an event
+     * for which they have already submitted a request.
      * <br>
      * Maps to HTTP 409 Conflict.
      */
@@ -53,7 +53,7 @@ public class GlobalExceptionHandler extends BaseExceptionHandler {
     }
 
     /**
-     * Handles violations of business logic within the event service.
+     * Handles violations of business logic within the request service.
      * <br>
      * Maps to HTTP 409 Conflict.
      */
@@ -70,24 +70,7 @@ public class GlobalExceptionHandler extends BaseExceptionHandler {
     }
 
     /**
-     * Handles the specific business rule where a category cannot be deleted if it is associated with events.
-     * <br>
-     * Maps to HTTP 409 Conflict, which is more appropriate than 404 for this case.
-     */
-    @ExceptionHandler(EntityDeletedException.class)
-    @ResponseStatus(HttpStatus.CONFLICT) // Corrected from NOT_FOUND to CONFLICT
-    public ApiError handleEntityDeletedException(EntityDeletedException e) {
-        log.warn("Cannot delete entity because it is in use: {}", e.getMessage());
-        return ApiError.builder()
-            .status(HttpStatus.CONFLICT)
-            .reason("The resource cannot be deleted due to existing associations.")
-            .message(e.getMessage())
-            .timestamp(LocalDateTime.now())
-            .build();
-    }
-
-    /**
-     * Handles database integrity violations with context-specific messaging.
+     * Handles database integrity violations.
      * <br>
      * Maps to HTTP 409 Conflict.
      */
@@ -96,21 +79,12 @@ public class GlobalExceptionHandler extends BaseExceptionHandler {
     public ApiError handleDataIntegrityViolationException(final DataIntegrityViolationException e) {
         log.warn("Database integrity violation: {}", e.getMessage(), e);
 
-        String rootCauseMessage = e.getMostSpecificCause().getMessage().toLowerCase();
-        String userMessage;
-
-        if (rootCauseMessage.contains("categories_name_key")) {
-            userMessage = "A category with this name already exists.";
-        } else if (rootCauseMessage.contains("compilations_title_key")) {
-            userMessage = "A compilation with this title already exists.";
-        } else {
-            userMessage = "A database integrity constraint was violated.";
-        }
+        String message = "A participation request for this event by this user might already exist.";
 
         return ApiError.builder()
             .status(HttpStatus.CONFLICT)
             .reason("Integrity constraint has been violated.")
-            .message(userMessage)
+            .message(message)
             .timestamp(LocalDateTime.now())
             .build();
     }

@@ -19,7 +19,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
  * Provides standardized, reusable handlers for shared or generic exceptions.
  */
 @Slf4j
-public abstract class AbstractExceptionHandler {
+public abstract class BaseExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
