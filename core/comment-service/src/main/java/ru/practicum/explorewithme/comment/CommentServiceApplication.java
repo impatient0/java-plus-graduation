@@ -8,7 +8,6 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @SpringBootApplication
 @EnableDiscoveryClient
 @EnableFeignClients(basePackages = {
-    "ru.practicum.explorewithme.stats.client",
     "ru.practicum.explorewithme.api.client.user",
     "ru.practicum.explorewithme.api.client.event"
 })
