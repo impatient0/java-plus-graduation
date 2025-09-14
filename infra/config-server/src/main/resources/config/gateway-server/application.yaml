@@ -30,65 +30,83 @@ spring:
                 name: default-breaker
                 fallbackUri: forward:/service-fallback
           routes:
-            - id: comment-service-admin-route
-              uri: lb://comment-service
-              predicates:
-                - Path=/admin/comments/**
-              order: 0
-
-            - id: comment-service-user-route
-              uri: lb://comment-service
-              predicates:
-                - Path=/users/{userId}/comments/**
-              order: 0
-
-            - id: comment-service-event-route
-              uri: lb://comment-service
-              predicates:
-                - Path=/events/{eventId}/comments/**
-              order: 0
-
-            - id: request-service-user-requests-route
-              uri: lb://request-service
-              predicates:
-                - Path=/users/{userId}/requests/**
-              order: 0
-
-            - id: request-service-event-requests-route
+            # ===================================================================
+            # Routes for Request Service
+            # ===================================================================
+            - id: request-service-owner-api
               uri: lb://request-service
               predicates:
                 - Path=/users/{userId}/events/{eventId}/requests/**
               order: 0
 
-            - id: event-service-admin-users-route
+            - id: request-service-user-api
+              uri: lb://request-service
+              predicates:
+                - Path=/users/{userId}/requests/**
+              order: 10 # Slightly less specific than the one above
+
+            # ===================================================================
+            # Routes for Comment Service
+            # ===================================================================
+            - id: comment-service-admin-api
+              uri: lb://comment-service
+              predicates:
+                - Path=/admin/comments/**
+              order: 20
+
+            - id: comment-service-user-api
+              uri: lb://comment-service
+              predicates:
+                - Path=/users/{userId}/comments/**
+              order: 30
+
+            - id: comment-service-public-api
+              uri: lb://comment-service
+              predicates:
+                - Path=/events/{eventId}/comments/**
+              order: 40
+
+            # ===================================================================
+            # Routes for User Service
+            # ===================================================================
+            - id: user-service-admin-api
               uri: lb://user-service
               predicates:
                 - Path=/admin/users/**
+              order: 100
 
-            - id: event-service-admin-route
+            # ===================================================================
+            # Routes for Event Service (The most general routes)
+            # ===================================================================
+            - id: event-service-admin-api
               uri: lb://event-service
               predicates:
                 - Path=/admin/**
+              order: 200
 
-            - id: event-service-users-route
+            - id: event-service-private-api
               uri: lb://event-service
               predicates:
                 - Path=/users/**
+              order: 210
 
-            - id: event-service-categories-route
-              uri: lb://event-service
-              predicates:
-                - Path=/categories/**
-
-            - id: event-service-events-route
+            - id: event-service-public-events-api
               uri: lb://event-service
               predicates:
                 - Path=/events/**
+              order: 220
 
-            - id: event-service-compilations-route
+            - id: event-service-public-categories-api
+              uri: lb://event-service
+              predicates:
+                - Path=/categories/**
+              order: 230
+
+            - id: event-service-public-compilations-api
               uri: lb://event-service
               predicates:
                 - Path=/compilations/**
+              order: 240
     loadbalancer:
       enabled: true
       retry:
