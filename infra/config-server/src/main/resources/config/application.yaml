@@ -1,8 +1,17 @@
+spring:
+  cloud:
+    loadbalancer:
+      health-check:
+        enabled: true
+        interval: 2000
+
 management:
   endpoint:
     health:
       probes:
         enabled: true
+      cache:
+        time-to-live: 1000
   health:
     livenessstate:
       enabled: true
@@ -16,10 +25,14 @@ management:
 eureka:
   instance:
     health-check-url-path: /actuator/health/readiness
-    lease-renewal-interval-in-seconds: 5
-    lease-expiration-duration-in-seconds: 15
+    health-check-url-enabled: true
 
   client:
     healthcheck:
       enabled: true
     registry-fetch-interval-seconds: 5
+    lease:
+      durationInSeconds: 30
+      renewalIntervalInSeconds: 10
+    registration:
+      initialDelayPeriod: 1000
