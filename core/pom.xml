@@ -19,7 +19,7 @@
   </properties>
 
   <modules>
-    <module>main-service</module>
+    <module>event-service</module>
     <module>stats-service</module>
     <module>user-service</module>
     <module>request-service</module>

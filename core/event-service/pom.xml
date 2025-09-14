@@ -5,19 +5,13 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>ru.practicum</groupId>
-    <artifactId>explore-with-me</artifactId>
+    <artifactId>core</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <relativePath>../../pom.xml</relativePath>
+    <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>request-service</artifactId>
+  <artifactId>event-service</artifactId>
   <packaging>jar</packaging>
-
-  <properties>
-    <maven.compiler.source>21</maven.compiler.source>
-    <maven.compiler.target>21</maven.compiler.target>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
 
   <dependencies>
     <dependency>
@@ -97,6 +91,23 @@
     <dependency>
       <groupId>org.mapstruct</groupId>
       <artifactId>mapstruct</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>junit-jupiter</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>postgresql</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 

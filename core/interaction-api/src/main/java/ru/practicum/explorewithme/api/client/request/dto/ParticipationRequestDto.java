@@ -1,8 +1,9 @@
-package ru.practicum.explorewithme.api.client.event.dto;
+package ru.practicum.explorewithme.api.client.request.dto;
 
 import static ru.practicum.explorewithme.api.constants.DateTimeConstants.DATE_TIME_FORMAT_PATTERN;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -10,22 +11,27 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import ru.practicum.explorewithme.api.client.user.dto.UserShortDto;
+import ru.practicum.explorewithme.api.client.request.enums.RequestStatus;
+
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class EventShortDto implements EventDtoWithConfirmedRequests {
+public class ParticipationRequestDto {
+
     Long id;
-    String annotation;
-    CategoryDto category;
-    Long confirmedRequests;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT_PATTERN)
-    LocalDateTime eventDate;
-    UserShortDto initiator;
-    Boolean paid;
-    String title;
-    Long views;
+    LocalDateTime created;
+
+    @JsonProperty("requester")
+    Long requesterId;
+
+    @JsonProperty("event")
+    Long eventId;
+
+    RequestStatus status;
+
 }

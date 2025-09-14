@@ -18,7 +18,7 @@ import ru.practicum.explorewithme.api.client.event.enums.EventState;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class EventFullDto {
+public class EventFullDto implements EventDtoWithConfirmedRequests {
     Long id;
     String annotation;
     CategoryDto category;

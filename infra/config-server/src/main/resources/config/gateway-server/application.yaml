@@ -48,33 +48,45 @@ spring:
                 - Path=/events/{eventId}/comments/**
               order: 0
 
-            - id: main-service-admin-users-route
+            - id: request-service-user-requests-route
+              uri: lb://request-service
+              predicates:
+                - Path=/users/{userId}/requests/**
+              order: 0
+
+            - id: request-service-event-requests-route
+              uri: lb://request-service
+              predicates:
+                - Path=/users/{userId}/events/{eventId}/requests/**
+              order: 0
+
+            - id: event-service-admin-users-route
               uri: lb://user-service
               predicates:
                 - Path=/admin/users/**
 
-            - id: main-service-admin-route
-              uri: lb://main-service
+            - id: event-service-admin-route
+              uri: lb://event-service
               predicates:
                 - Path=/admin/**
 
-            - id: main-service-users-route
-              uri: lb://main-service
+            - id: event-service-users-route
+              uri: lb://event-service
               predicates:
                 - Path=/users/**
 
-            - id: main-service-categories-route
-              uri: lb://main-service
+            - id: event-service-categories-route
+              uri: lb://event-service
               predicates:
                 - Path=/categories/**
 
-            - id: main-service-events-route
-              uri: lb://main-service
+            - id: event-service-events-route
+              uri: lb://event-service
               predicates:
                 - Path=/events/**
 
-            - id: main-service-compilations-route
-              uri: lb://main-service
+            - id: event-service-compilations-route
+              uri: lb://event-service
               predicates:
                 - Path=/compilations/**
     loadbalancer:

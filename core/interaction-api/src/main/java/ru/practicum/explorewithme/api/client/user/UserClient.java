@@ -13,19 +13,27 @@ import ru.practicum.explorewithme.api.client.user.dto.UserDto;
 public interface UserClient {
 
     /**
-     * Retrieves a list of users by their IDs. Essential for bulk enrichment.
+     * Fetches a list of users based on their IDs.
+     * This method is essential for bulk enrichment operations.
+     * @param ids The list of user IDs to retrieve.
+     * @return A List of UserDto objects, each containing user details.
      */
     @GetMapping("/by-ids")
     List<UserDto> getUsersByIds(@RequestParam("ids") List<Long> ids);
 
     /**
-     * Retrieves a single user by their ID.
+     * Fetches details for a single user by their IDs.
+     * @param id The ID of the user to retrieve.
+     * @return The UserDto object containing the user's details.
      */
     @GetMapping("/{id}")
     UserDto getUserById(@PathVariable("id") Long id);
 
     /**
-     * An efficient way to check for existence.
+     * Performs an efficient existence check for a user by their ID.
+     * This method typically returns a 2xx status code if the user exists
+     * and a 404 status code if the user does not exist, without returning a body.
+     * @param id The ID of the user to check for existence.
      */
     @RequestMapping(method = RequestMethod.HEAD, value = "/{id}")
     void checkUserExists(@PathVariable("id") Long id);
