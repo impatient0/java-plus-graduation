@@ -3,7 +3,7 @@ package ru.practicum.explorewithme.comment.domain;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Sort;
-import ru.practicum.explorewithme.comment.application.AdminCommentSearchParams;
+import ru.practicum.explorewithme.comment.application.params.AdminCommentSearchParams;
 
 public interface CommentRepository {
 

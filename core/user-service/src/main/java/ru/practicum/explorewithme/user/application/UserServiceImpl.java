@@ -10,9 +10,10 @@ import ru.practicum.explorewithme.api.client.user.dto.NewUserRequestDto;
 import ru.practicum.explorewithme.api.client.user.dto.UserDto;
 import ru.practicum.explorewithme.api.error.EntityAlreadyExistsException;
 import ru.practicum.explorewithme.api.error.EntityNotFoundException;
+import ru.practicum.explorewithme.user.application.params.GetListUsersParameters;
 import ru.practicum.explorewithme.user.domain.User;
 import ru.practicum.explorewithme.user.domain.UserRepository;
-import ru.practicum.explorewithme.user.infrastructure.UserMapper;
+import ru.practicum.explorewithme.user.infrastructure.mapper.UserMapper;
 
 @Service
 @RequiredArgsConstructor

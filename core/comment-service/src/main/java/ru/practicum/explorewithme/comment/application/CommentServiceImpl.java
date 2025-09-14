@@ -25,9 +25,11 @@ import ru.practicum.explorewithme.api.client.user.dto.UserShortDto;
 import ru.practicum.explorewithme.api.error.BusinessRuleViolationException;
 import ru.practicum.explorewithme.api.error.EntityNotFoundException;
 import ru.practicum.explorewithme.api.utility.DtoMapper;
+import ru.practicum.explorewithme.comment.application.params.AdminCommentSearchParams;
+import ru.practicum.explorewithme.comment.application.params.PublicCommentParameters;
 import ru.practicum.explorewithme.comment.domain.Comment;
 import ru.practicum.explorewithme.comment.domain.CommentRepository;
-import ru.practicum.explorewithme.comment.infrastructure.CommentMapper;
+import ru.practicum.explorewithme.comment.infrastructure.mapper.CommentMapper;
 
 @Service
 @RequiredArgsConstructor

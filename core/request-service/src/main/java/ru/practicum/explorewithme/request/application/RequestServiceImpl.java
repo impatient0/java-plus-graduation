@@ -19,10 +19,11 @@ import ru.practicum.explorewithme.api.client.request.dto.ParticipationRequestDto
 import ru.practicum.explorewithme.api.client.user.UserClient;
 import ru.practicum.explorewithme.api.error.BusinessRuleViolationException;
 import ru.practicum.explorewithme.api.error.EntityNotFoundException;
+import ru.practicum.explorewithme.request.application.params.EventRequestStatusUpdateRequestParams;
 import ru.practicum.explorewithme.request.domain.ParticipationRequest;
 import ru.practicum.explorewithme.request.domain.RequestRepository;
 import ru.practicum.explorewithme.request.domain.RequestStatus;
-import ru.practicum.explorewithme.request.infrastructure.RequestMapper;
+import ru.practicum.explorewithme.request.infrastructure.mapper.RequestMapper;
 
 @Service
 @RequiredArgsConstructor
@@ -77,7 +78,8 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     @Transactional
-    public EventRequestStatusUpdateResultDto updateRequestsStatus(EventRequestStatusUpdateRequestParams requestParams) {
+    public EventRequestStatusUpdateResultDto updateRequestsStatus(
+        EventRequestStatusUpdateRequestParams requestParams) {
         Long userId = requestParams.getUserId();
         Long eventId = requestParams.getEventId();
         List<Long> requestIdsForUpdate = requestParams.getRequestIds();

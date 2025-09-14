@@ -9,7 +9,6 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.springframework.format.annotation.DateTimeFormat;
-import ru.practicum.explorewithme.event.application.SearchParamsWithDateRange;
 import ru.practicum.explorewithme.event.application.validation.ValidDateRange;
 
 @Getter

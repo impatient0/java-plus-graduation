@@ -13,7 +13,7 @@ import ru.practicum.explorewithme.api.error.EntityNotFoundException;
 import ru.practicum.explorewithme.event.domain.Category;
 import ru.practicum.explorewithme.event.domain.CategoryRepository;
 import ru.practicum.explorewithme.event.domain.EventRepository;
-import ru.practicum.explorewithme.event.infrastructure.CategoryMapper;
+import ru.practicum.explorewithme.event.infrastructure.mapper.CategoryMapper;
 
 @Service
 @RequiredArgsConstructor

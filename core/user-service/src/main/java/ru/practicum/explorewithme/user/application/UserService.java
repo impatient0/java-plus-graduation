@@ -3,6 +3,7 @@ package ru.practicum.explorewithme.user.application;
 import java.util.List;
 import ru.practicum.explorewithme.api.client.user.dto.NewUserRequestDto;
 import ru.practicum.explorewithme.api.client.user.dto.UserDto;
+import ru.practicum.explorewithme.user.application.params.GetListUsersParameters;
 
 public interface UserService {
 

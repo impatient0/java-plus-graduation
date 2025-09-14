@@ -5,6 +5,8 @@ import ru.practicum.explorewithme.api.client.comment.dto.CommentAdminDto;
 import ru.practicum.explorewithme.api.client.comment.dto.CommentDto;
 import ru.practicum.explorewithme.api.client.comment.dto.NewCommentDto;
 import ru.practicum.explorewithme.api.client.comment.dto.UpdateCommentDto;
+import ru.practicum.explorewithme.comment.application.params.AdminCommentSearchParams;
+import ru.practicum.explorewithme.comment.application.params.PublicCommentParameters;
 
 public interface CommentService {
 

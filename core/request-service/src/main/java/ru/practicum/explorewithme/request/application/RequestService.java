@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import ru.practicum.explorewithme.api.client.request.dto.EventRequestStatusUpdateResultDto;
 import ru.practicum.explorewithme.api.client.request.dto.ParticipationRequestDto;
+import ru.practicum.explorewithme.request.application.params.EventRequestStatusUpdateRequestParams;
 
 public interface RequestService {
 
@@ -17,7 +18,8 @@ public interface RequestService {
 
     List<ParticipationRequestDto> getEventRequests(@Positive Long userId, @Positive Long eventId);
 
-    EventRequestStatusUpdateResultDto updateRequestsStatus(EventRequestStatusUpdateRequestParams requestParams);
+    EventRequestStatusUpdateResultDto updateRequestsStatus(
+        EventRequestStatusUpdateRequestParams requestParams);
 
     Map<Long, Long> getConfirmedRequestCounts(Set<Long> eventIds);
 

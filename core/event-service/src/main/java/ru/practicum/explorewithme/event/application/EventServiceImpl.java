@@ -33,8 +33,8 @@ import ru.practicum.explorewithme.event.domain.CategoryRepository;
 import ru.practicum.explorewithme.event.domain.Event;
 import ru.practicum.explorewithme.event.domain.EventRepository;
 import ru.practicum.explorewithme.event.domain.EventState;
-import ru.practicum.explorewithme.event.infrastructure.EventMapper;
-import ru.practicum.explorewithme.event.infrastructure.LocationMapper;
+import ru.practicum.explorewithme.event.infrastructure.mapper.EventMapper;
+import ru.practicum.explorewithme.event.infrastructure.mapper.LocationMapper;
 import ru.practicum.explorewithme.stats.client.StatsClient;
 import ru.practicum.explorewithme.stats.dto.ViewStatsDto;
 

@@ -2,7 +2,7 @@ package ru.practicum.explorewithme.event.application.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import ru.practicum.explorewithme.event.application.SearchParamsWithDateRange;
+import ru.practicum.explorewithme.event.application.params.SearchParamsWithDateRange;
 
 public class DateRangeValidator implements
     ConstraintValidator<ValidDateRange, SearchParamsWithDateRange> {

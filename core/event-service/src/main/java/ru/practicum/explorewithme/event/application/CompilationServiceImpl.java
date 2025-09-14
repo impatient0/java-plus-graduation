@@ -19,7 +19,7 @@ import ru.practicum.explorewithme.event.domain.Compilation;
 import ru.practicum.explorewithme.event.domain.CompilationRepository;
 import ru.practicum.explorewithme.event.domain.Event;
 import ru.practicum.explorewithme.event.domain.EventRepository;
-import ru.practicum.explorewithme.event.infrastructure.CompilationMapper;
+import ru.practicum.explorewithme.event.infrastructure.mapper.CompilationMapper;
 
 @Service
 @RequiredArgsConstructor
