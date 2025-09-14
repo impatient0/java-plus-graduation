@@ -17,7 +17,7 @@ import ru.practicum.explorewithme.api.client.user.dto.UserShortDto;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CommentAdminDto {
+public class CommentAdminDto implements CommentDtoWithAuthor {
 
     Long id;
 

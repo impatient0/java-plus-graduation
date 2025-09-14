@@ -13,10 +13,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.explorewithme.api.client.comment.dto.CommentAdminDto;
 import ru.practicum.explorewithme.api.client.comment.dto.CommentDto;
+import ru.practicum.explorewithme.api.client.comment.dto.CommentDtoWithAuthor;
 import ru.practicum.explorewithme.api.client.comment.dto.NewCommentDto;
 import ru.practicum.explorewithme.api.client.comment.dto.UpdateCommentDto;
 import ru.practicum.explorewithme.api.client.event.EventClient;
-import ru.practicum.explorewithme.api.client.event.dto.EventFullDto;
+import ru.practicum.explorewithme.api.client.event.dto.EventInternalDto;
 import ru.practicum.explorewithme.api.client.event.enums.EventState;
 import ru.practicum.explorewithme.api.client.user.UserClient;
 import ru.practicum.explorewithme.api.client.user.dto.UserDto;
@@ -42,7 +43,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional(readOnly = true)
     public List<CommentDto> getCommentsForEvent(Long eventId, PublicCommentParameters parameters) {
-        EventFullDto event = eventClient.getEventById(eventId);
+        EventInternalDto event = eventClient.getEventById(eventId);
 
         if (event.getState() != EventState.PUBLISHED) {
             throw new EntityNotFoundException("Published event", "Id", eventId);
@@ -58,7 +59,7 @@ public class CommentServiceImpl implements CommentService {
             parameters.getSort()
         );
 
-        return enrichCommentsWithAuthors(result);
+        return enrichCommentsWithAuthors(result, commentMapper.toDtoList(result));
     }
 
     @Override
@@ -72,7 +73,7 @@ public class CommentServiceImpl implements CommentService {
             size
         );
 
-        return enrichCommentsWithAuthors(result);
+        return enrichCommentsWithAuthors(result, commentMapper.toDtoList(result));
     }
 
     @Override
@@ -80,7 +81,7 @@ public class CommentServiceImpl implements CommentService {
     public CommentDto addComment(Long userId, Long eventId, NewCommentDto newCommentDto) {
         UserDto author = userClient.getUserById(userId);
 
-        EventFullDto event = eventClient.getEventById(eventId);
+        EventInternalDto event = eventClient.getEventById(eventId);
 
         if (!event.getState().equals(EventState.PUBLISHED)) {
             throw new BusinessRuleViolationException("Событие еще не опубликовано");
@@ -95,8 +96,7 @@ public class CommentServiceImpl implements CommentService {
         comment.setAuthorId(userId);
 
         Comment savedComment = commentRepository.save(comment);
-
-        return enrichCommentsWithAuthors(List.of(savedComment)).getFirst();
+        return enrichCommentsWithAuthors(List.of(savedComment), List.of(commentMapper.toDto(savedComment))).getFirst();
     }
 
     @Override
@@ -126,7 +126,7 @@ public class CommentServiceImpl implements CommentService {
         existedComment.setEdited(true);
 
         Comment updatedComment = commentRepository.save(existedComment);
-        return enrichCommentsWithAuthors(List.of(updatedComment)).getFirst();
+        return enrichCommentsWithAuthors(List.of(updatedComment), List.of(commentMapper.toDto(updatedComment))).getFirst();
     }
 
     @Override
@@ -163,7 +163,7 @@ public class CommentServiceImpl implements CommentService {
             comment.setDeleted(false);
             comment = commentRepository.save(comment);
         }
-        return enrichCommentsWithAuthorsAdmin(List.of(comment)).getFirst();
+        return enrichCommentsWithAuthors(List.of(comment), List.of(commentMapper.toAdminDto(comment))).getFirst();
     }
 
     @Override
@@ -174,10 +174,18 @@ public class CommentServiceImpl implements CommentService {
         List<Comment> commentList = commentRepository.findAllAdmin(searchParams, from, size);
 
         log.debug("Admin: Found {} comments for the given criteria.", commentList.size());
-        return enrichCommentsWithAuthorsAdmin(commentList);
+        return enrichCommentsWithAuthors(commentList, commentMapper.toAdminDtoList(commentList));
     }
 
-    private List<CommentDto> enrichCommentsWithAuthors(List<Comment> comments) {
+    /**
+     * Enriches a list of comment DTOs with the information about the comment authors.
+     *
+     * @param comments A list of Comment objects that provide author IDs.
+     * @param dtos A list of DTOs that extend a base type with setAuthor().
+     * @param <T> The specific type of the DTO (e.g., CommentDto, CommentAdminDto).
+     * @return The same list of DTOs, now with the author field populated.
+     */
+    private <T extends CommentDtoWithAuthor> List<T> enrichCommentsWithAuthors(List<Comment> comments, List<T> dtos) {
         if (comments == null || comments.isEmpty()) {
             return List.of();
         }
@@ -190,31 +198,13 @@ public class CommentServiceImpl implements CommentService {
             .stream()
             .collect(Collectors.toMap(UserDto::getId, dtoMapper::toUserShortDto));
 
-        return comments.stream().map(comment -> {
-            CommentDto commentDto = commentMapper.toDto(comment);
-            commentDto.setAuthor(authorMap.getOrDefault(comment.getAuthorId(), createUnknownUserDto()));
-            return commentDto;
-        }).collect(Collectors.toList());
-    }
-
-    private List<CommentAdminDto> enrichCommentsWithAuthorsAdmin(List<Comment> comments) {
-        if (comments == null || comments.isEmpty()) {
-            return List.of();
+        for (int i = 0; i < comments.size(); i++) {
+            Comment comment = comments.get(i);
+            T dto = dtos.get(i);
+            dto.setAuthor(authorMap.getOrDefault(comment.getAuthorId(), createUnknownUserDto()));
         }
 
-        Set<Long> authorIds = comments.stream()
-            .map(Comment::getAuthorId)
-            .collect(Collectors.toSet());
-
-        Map<Long, UserShortDto> authorMap = userClient.getUsersByIds(new ArrayList<>(authorIds))
-            .stream()
-            .collect(Collectors.toMap(UserDto::getId, dtoMapper::toUserShortDto));
-
-        return comments.stream().map(comment -> {
-            CommentAdminDto adminDto = commentMapper.toAdminDto(comment);
-            adminDto.setAuthor(authorMap.getOrDefault(comment.getAuthorId(), createUnknownUserDto()));
-            return adminDto;
-        }).collect(Collectors.toList());
+        return dtos;
     }
 
     private UserShortDto createUnknownUserDto() {
