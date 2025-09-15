@@ -137,15 +137,12 @@ public class RequestServiceImpl implements RequestService {
              }
         });
         requestRepository.saveAll(requestsMap.values());
+
         if (availableRequests[0] == 0) {
-            List<ParticipationRequest> pendingRequests = requestRepository.findByEventIdAndStatus(eventId, RequestStatus.PENDING);
-            if (!pendingRequests.isEmpty()) {
-                pendingRequests.forEach(request -> request.setStatus(RequestStatus.REJECTED));
-                requestRepository.saveAll(pendingRequests);
-                result.getRejectedRequests().addAll(pendingRequests.stream()
-                        .map(requestMapper::toRequestDto).toList());
-            }
+            log.debug("Participant limit for event {} reached. Rejecting all other pending requests.", eventId);
+            requestRepository.rejectAllPendingRequestsForEvent(eventId);
         }
+
         return result;
     }
 
