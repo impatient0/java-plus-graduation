@@ -32,8 +32,6 @@ public interface JpaRequestRepository extends JpaRepository<ParticipationRequest
         "WHERE r.eventId = :eventId AND r.status = 'PENDING'")
     void rejectAllPendingForEvent(@Param("eventId") Long eventId);
 
-    List<ParticipationRequest> findByEventIdAndStatus(Long eventId, RequestStatus status);
-
     List<ParticipationRequest> findByEventId(Long eventId);
 
     @Query("SELECT r.eventId as eventId, COUNT(r.id) as requestCount " +

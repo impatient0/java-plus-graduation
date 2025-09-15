@@ -81,11 +81,6 @@ public class RequestRepositoryAdapter implements RequestRepository {
     }
 
     @Override
-    public List<ParticipationRequest> findByEventIdAndStatus(Long eventId, RequestStatus status) {
-        return jpaRequestRepository.findByEventIdAndStatus(eventId, status);
-    }
-
-    @Override
     public Map<Long, Long> getConfirmedRequestCounts(Set<Long> eventIds) {
         if (eventIds == null || eventIds.isEmpty()) {
             return Map.of();

@@ -32,14 +32,6 @@ public interface RequestRepository {
     void rejectAllPendingRequestsForEvent(Long eventId);
 
     /**
-     * Finds all requests for a given event that have a specific status.
-     * @param eventId The ID of the event.
-     * @param status The status to filter by.
-     * @return A list of matching participation requests.
-     */
-    List<ParticipationRequest> findByEventIdAndStatus(Long eventId, RequestStatus status);
-
-    /**
      * Efficiently counts the number of confirmed requests for a set of event IDs.
      *
      * @param eventIds The set of event IDs to check.
