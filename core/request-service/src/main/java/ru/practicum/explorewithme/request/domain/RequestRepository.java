@@ -7,9 +7,9 @@ import java.util.Set;
 
 public interface RequestRepository {
 
-    ParticipationRequest save(ParticipationRequest request);
+    void save(ParticipationRequest request);
 
-    List<ParticipationRequest> saveAll(Iterable<ParticipationRequest> requests);
+    void saveAll(Iterable<ParticipationRequest> requests);
 
     Optional<ParticipationRequest> findByIdAndRequesterId(Long requestId, Long requesterId);
 

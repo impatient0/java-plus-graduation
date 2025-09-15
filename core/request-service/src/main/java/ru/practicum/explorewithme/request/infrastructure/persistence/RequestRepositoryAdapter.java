@@ -23,13 +23,13 @@ public class RequestRepositoryAdapter implements RequestRepository {
     private final Sort defaultSort = Sort.by(Sort.Direction.DESC, "created");
 
     @Override
-    public ParticipationRequest save(ParticipationRequest request) {
-        return jpaRequestRepository.save(request);
+    public void save(ParticipationRequest request) {
+        jpaRequestRepository.save(request);
     }
 
     @Override
-    public List<ParticipationRequest> saveAll(Iterable<ParticipationRequest> requests) {
-        return jpaRequestRepository.saveAll(requests);
+    public void saveAll(Iterable<ParticipationRequest> requests) {
+        jpaRequestRepository.saveAll(requests);
     }
 
     @Override
