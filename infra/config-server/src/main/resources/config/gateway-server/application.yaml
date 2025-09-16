@@ -30,30 +30,83 @@ spring:
                 name: default-breaker
                 fallbackUri: forward:/service-fallback
           routes:
-            - id: main-service-admin-route
-              uri: lb://main-service
+            # ===================================================================
+            # Routes for Request Service
+            # ===================================================================
+            - id: request-service-owner-api
+              uri: lb://request-service
+              predicates:
+                - Path=/users/{userId}/events/{eventId}/requests/**
+              order: 0
+
+            - id: request-service-user-api
+              uri: lb://request-service
+              predicates:
+                - Path=/users/{userId}/requests/**
+              order: 10 # Slightly less specific than the one above
+
+            # ===================================================================
+            # Routes for Comment Service
+            # ===================================================================
+            - id: comment-service-admin-api
+              uri: lb://comment-service
+              predicates:
+                - Path=/admin/comments/**
+              order: 20
+
+            - id: comment-service-user-api
+              uri: lb://comment-service
+              predicates:
+                - Path=/users/{userId}/comments/**
+              order: 30
+
+            - id: comment-service-public-api
+              uri: lb://comment-service
+              predicates:
+                - Path=/events/{eventId}/comments/**
+              order: 40
+
+            # ===================================================================
+            # Routes for User Service
+            # ===================================================================
+            - id: user-service-admin-api
+              uri: lb://user-service
+              predicates:
+                - Path=/admin/users/**
+              order: 100
+
+            # ===================================================================
+            # Routes for Event Service (The most general routes)
+            # ===================================================================
+            - id: event-service-admin-api
+              uri: lb://event-service
               predicates:
                 - Path=/admin/**
+              order: 200
 
-            - id: main-service-users-route
-              uri: lb://main-service
+            - id: event-service-private-api
+              uri: lb://event-service
               predicates:
                 - Path=/users/**
+              order: 210
 
-            - id: main-service-categories-route
-              uri: lb://main-service
-              predicates:
-                - Path=/categories/**
-
-            - id: main-service-events-route
-              uri: lb://main-service
+            - id: event-service-public-events-api
+              uri: lb://event-service
               predicates:
                 - Path=/events/**
+              order: 220
 
-            - id: main-service-compilations-route
-              uri: lb://main-service
+            - id: event-service-public-categories-api
+              uri: lb://event-service
+              predicates:
+                - Path=/categories/**
+              order: 230
+
+            - id: event-service-public-compilations-api
+              uri: lb://event-service
               predicates:
                 - Path=/compilations/**
+              order: 240
     loadbalancer:
       enabled: true
       retry:

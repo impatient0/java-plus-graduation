@@ -2,13 +2,8 @@ server:
   port: 9090
 
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:6543/ewm_stats_db
-    username: stats_user
-    password: stats_password
   jpa:
     hibernate:
-      ddl-auto: update
       show-sql: true
     properties:
       hibernate.format_sql: true

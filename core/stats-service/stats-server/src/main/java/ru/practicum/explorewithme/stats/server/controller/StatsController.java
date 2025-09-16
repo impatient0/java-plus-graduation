@@ -1,6 +1,6 @@
 package ru.practicum.explorewithme.stats.server.controller;
 
-import static ru.practicum.explorewithme.common.constants.DateTimeConstants.DATE_TIME_FORMAT_PATTERN;
+import static ru.practicum.explorewithme.api.constants.DateTimeConstants.DATE_TIME_FORMAT_PATTERN;
 
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
