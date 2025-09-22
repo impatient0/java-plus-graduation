@@ -8,7 +8,7 @@ import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.Deserializer;
-import ru.practicum.explorewithme.stats.kafka.EventSimilarityAvro;
+import ru.practicum.ewm.stats.kafka.EventSimilarityAvro;
 
 @Slf4j
 public class EventSimilarityAvroDeserializer implements Deserializer<EventSimilarityAvro> {

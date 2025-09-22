@@ -4,4 +4,4 @@ server:
 logging:
   level:
     root: INFO
-    ru.practicum.explorewithme.main: DEBUG
+    ru.practicum.ewm.main: DEBUG

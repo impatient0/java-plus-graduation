@@ -8,7 +8,7 @@ import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.Deserializer;
-import ru.practicum.explorewithme.stats.kafka.UserActionAvro;
+import ru.practicum.ewm.stats.kafka.UserActionAvro;
 
 @Slf4j
 public class UserActionAvroDeserializer implements Deserializer<UserActionAvro> {

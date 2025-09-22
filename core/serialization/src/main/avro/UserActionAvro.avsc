@@ -1,5 +1,5 @@
 {
-  "namespace": "ru.practicum.explorewithme.stats.kafka",
+  "namespace": "ru.practicum.ewm.stats.kafka",
   "type": "record",
   "name": "UserActionAvro",
   "fields": [
@@ -15,7 +15,7 @@
     },
     {
       "name": "actionType",
-      "type": "ru.practicum.explorewithme.stats.kafka.ActionTypeAvro",
+      "type": "ru.practicum.ewm.stats.kafka.ActionTypeAvro",
       "doc": "The type of action performed."
     },
     {
