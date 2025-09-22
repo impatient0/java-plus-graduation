@@ -8,6 +8,7 @@ import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.BinaryEncoder;
 import org.apache.avro.io.EncoderFactory;
+import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.Serializer;
@@ -26,7 +27,7 @@ public class AvroSerializer<T extends SpecificRecordBase> implements Serializer<
             return null;
         }
 
-        GenericDatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<>(payload.getSchema());
+        SpecificDatumWriter<GenericRecord> datumWriter = new SpecificDatumWriter<>(payload.getSchema());
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             BinaryEncoder encoder = EncoderFactory.get().binaryEncoder(outputStream, null);
             datumWriter.write(payload, encoder);
