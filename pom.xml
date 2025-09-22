@@ -27,6 +27,11 @@
 		<mockito.version>5.14.2</mockito.version>
 		<querydsl.version>5.1.0</querydsl.version>
 		<org.mapstruct.version>1.6.3</org.mapstruct.version>
+    <avro.version>1.12.0</avro.version>
+    <protobuf.version>3.9.1</protobuf.version>
+    <protobuf-plugin.version>3.9.1</protobuf-plugin.version>
+    <grpc.version>1.75.0</grpc.version>
+    <kafka.version>4.1.0</kafka.version>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 	</properties>
@@ -157,6 +162,31 @@
 				<artifactId>mapstruct</artifactId>
 				<version>${org.mapstruct.version}</version>
 			</dependency>
+      <dependency>
+        <groupId>org.apache.avro</groupId>
+        <artifactId>avro</artifactId>
+        <version>${avro.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.grpc</groupId>
+        <artifactId>grpc-protobuf</artifactId>
+        <version>${grpc.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.grpc</groupId>
+        <artifactId>grpc-stub</artifactId>
+        <version>${grpc.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.protobuf</groupId>
+        <artifactId>protobuf-java-util</artifactId>
+        <version>${protobuf.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.kafka</groupId>
+        <artifactId>kafka_2.13</artifactId>
+        <version>${kafka.version}</version>
+      </dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -199,6 +229,21 @@
 						<generatedSourcesDirectory>${project.build.directory}/generated-sources/annotations</generatedSourcesDirectory>
 					</configuration>
 				</plugin>
+        <plugin>
+          <groupId>org.apache.avro</groupId>
+          <artifactId>avro-maven-plugin</artifactId>
+          <version>${avro.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>io.github.ascopes</groupId>
+          <artifactId>protobuf-maven-plugin</artifactId>
+          <version>${protobuf-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>3.6.1</version>
+        </plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
