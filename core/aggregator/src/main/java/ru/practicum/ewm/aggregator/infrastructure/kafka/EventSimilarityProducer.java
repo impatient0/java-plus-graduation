@@ -15,7 +15,7 @@ public class EventSimilarityProducer {
     private final KafkaTemplate<String, EventSimilarityAvro> kafkaTemplate;
 
     public EventSimilarityProducer(
-        @Value("${kafka.topic.event-similarity}") String eventSimilarityTopic,
+        @Value("${kafka.topic.events-similarity}") String eventSimilarityTopic,
         KafkaTemplate<String, EventSimilarityAvro> kafkaTemplate) {
         this.eventSimilarityTopic = eventSimilarityTopic;
         this.kafkaTemplate = kafkaTemplate;

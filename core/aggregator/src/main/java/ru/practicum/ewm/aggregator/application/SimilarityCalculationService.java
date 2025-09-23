@@ -1,6 +1,7 @@
 package ru.practicum.ewm.aggregator.application;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -58,6 +59,9 @@ public class SimilarityCalculationService {
             Map<Long, Double> userEventWeights = userEventWeightsRepo.findWeightsByUserId(userId);
             log.debug("Retrieved all event weights for user {}: {}", userId, userEventWeights.keySet());
 
+            // Store deltas for affected events
+            Map<Long, Double> minWeightDeltas = new HashMap<>();
+
             for (Entry<Long, Double> entry : userEventWeights.entrySet()) {
                 long otherEventId = entry.getKey();
                 if (otherEventId == eventId) {
@@ -71,28 +75,36 @@ public class SimilarityCalculationService {
                 double newMin = Math.min(newWeight, otherEventWeight);
 
                 if (newMin > oldMin) {
-                    long eventA = Math.min(eventId, otherEventId);
-                    long eventB = Math.max(eventId, otherEventId);
-                    double newMinSum = eventPairMinWeightSumsRepo.updateWithDelta(eventA, eventB,
-                        newMin - oldMin);
-
-                    // Calculate new similarity score
-                    double otherEventWeightSum = eventWeightSumsRepo.findWeightSum(otherEventId);
-                    double similarity = newMinSum / Math.sqrt(newWeightSum * otherEventWeightSum);
-                    log.debug("Calculated similarity for pair ({}, {}): {} (newMinSum: {}, newWeightSum: {}, otherEventWeightSum: {})",
-                        eventA, eventB, similarity, newMinSum, newWeightSum, otherEventWeightSum);
-
-                    EventSimilarityAvro avroMessage = EventSimilarityAvro.newBuilder()
-                        .setEventA(eventA)
-                        .setEventB(eventB)
-                        .setScore(similarity)
-                        .setTimestamp(Instant.now())
-                        .build();
-
-                    // Publish similarity to Kafka
-                    producer.sendEventSimilarity(avroMessage);
+                    minWeightDeltas.put(otherEventId, newMin - oldMin);
                 }
             }
+
+            // Update affected events and retrieve their weights
+            Map<Long, Double> minWeightSums = eventPairMinWeightSumsRepo.updateWithDeltas(eventId, minWeightDeltas);
+            Map<Long, Double> weightSums = eventWeightSumsRepo.findWeightSums(minWeightDeltas.keySet());
+
+            for (Long otherEventId : minWeightDeltas.keySet()) {
+                long eventA = Math.min(eventId, otherEventId);
+                long eventB = Math.max(eventId, otherEventId);
+
+                // Calculate new similarity score
+                double otherEventWeightSum = weightSums.get(otherEventId);
+                double minWeightSum = minWeightSums.get(otherEventId);
+                double similarity = minWeightSum / Math.sqrt(newWeightSum * otherEventWeightSum);
+                log.debug("Calculated similarity for pair ({}, {}): {} (newMinSum: {}, newWeightSum: {}, otherEventWeightSum: {})",
+                    eventA, eventB, similarity, minWeightSum, newWeightSum, otherEventWeightSum);
+
+                EventSimilarityAvro avroMessage = EventSimilarityAvro.newBuilder()
+                    .setEventA(eventA)
+                    .setEventB(eventB)
+                    .setScore(similarity)
+                    .setTimestamp(Instant.now())
+                    .build();
+
+                // Publish similarity to Kafka
+                producer.sendEventSimilarity(avroMessage);
+            }
+            log.info("Updated {} similarity values", minWeightDeltas.size());
         }
         log.info("Finished updating similarities for user {} and event {}", userId, eventId);
     }
