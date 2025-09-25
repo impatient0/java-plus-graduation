@@ -2,16 +2,26 @@ package ru.practicum.ewm.analyzer.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
-@Table(name = "user_interactions", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id",
-    "event_id"}))
+@Table(name = "user_interactions")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class UserInteraction {
 
     @Id
@@ -23,6 +33,7 @@ public class UserInteraction {
     private Long eventId;
     @Column(nullable = false)
     private Double weight;
-    @Column(nullable = false)
-    private Instant lastUpdated;
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private Instant interactionTime;
 }

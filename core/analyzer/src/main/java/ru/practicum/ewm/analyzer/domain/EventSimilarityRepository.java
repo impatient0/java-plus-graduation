@@ -3,8 +3,29 @@ package ru.practicum.ewm.analyzer.domain;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public interface EventSimilarityRepository {
+
+    /**
+     * Retrieves event similarity data for a specific pair of events.
+     * The method considers the pair (eventA, eventB) regardless of the order, typically by
+     * normalizing the event IDs internally (e.g., using {@code Math.min} and {@code Math.max}).
+     *
+     * @param eventA The ID of the first event in the pair.
+     * @param eventB The ID of the second event in the pair.
+     * @return An {@link Optional} containing the {@link EventSimilarity} object if data for the pair is found,
+     *         or an empty {@link Optional} otherwise.
+     */
+    Optional<EventSimilarity> findByEventAAndEventB(long eventA, long eventB);
+
+    /**
+     * Saves a new event similarity record or updates an existing one.
+     *
+     * @param similarity The {@link EventSimilarity} object to be saved.
+     * @return The saved {@link EventSimilarity} object, possibly with generated IDs or updated fields.
+     */
+    EventSimilarity save(EventSimilarity similarity);
 
     /**
      * Retrieves a specified number of events that are most similar to a target event,
@@ -21,7 +42,6 @@ public interface EventSimilarityRepository {
     /**
      * Retrieves the `maxResults` number of top events based on their average similarity to a given set of events.
      * The returned list is ordered by the average similarity score in descending order.
-     * This method is useful for finding general recommendations based on a user's recent interactions or a theme.
      *
      * @param recentlyInteractedEvents A {@link Collection} of event IDs representing the base set for similarity calculation.
      * @param maxResults The maximum number of top similar events to return.
