@@ -2,7 +2,7 @@ spring:
   application:
     name: collector
   profiles:
-    active: postgres, kafka
+    active: kafka
   config:
     import: "configserver:"
   cloud:
