@@ -2,7 +2,7 @@ spring:
   application:
     name: aggregator
   profiles:
-    active: kafka
+    active: kafka, recommendations
   config:
     import: "configserver:"
   cloud:

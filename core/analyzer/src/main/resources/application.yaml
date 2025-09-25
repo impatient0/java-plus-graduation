@@ -2,7 +2,7 @@ spring:
   application:
     name: analyzer
   profiles:
-    active: postgres, kafka
+    active: postgres, kafka, recommendations
   config:
     import: "configserver:"
   cloud:

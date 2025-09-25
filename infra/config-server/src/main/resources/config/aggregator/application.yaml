@@ -14,9 +14,3 @@ kafka:
   topic:
     user-actions: stats.user-actions.v1
     events-similarity: stats.events-similarity.v1
-
-recommendations:
-  action-weights:
-    VIEW: 1.0
-    REGISTER: 3.0
-    LIKE: 5.0
