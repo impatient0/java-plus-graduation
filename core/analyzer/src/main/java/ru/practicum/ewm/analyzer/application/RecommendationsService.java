@@ -24,37 +24,67 @@ public class RecommendationsService {
 
     @Transactional(readOnly = true)
     public List<Recommendation> findSimilarEvents(long eventId, long userId, int maxResults) {
+        log.info("Finding top {} similar events for event {} excluding events interacted by user {}", maxResults, eventId, userId);
+
         List<Long> interactedEvents = interactionRepository.findInteractedEvents(userId);
-        return similarityRepository.findTopSimilarExcluding(eventId, interactedEvents, maxResults);
+        log.debug("User {} has interacted with {} events.", userId, interactedEvents.size());
+
+        List<Recommendation> similarEvents = similarityRepository.findTopSimilarExcluding(eventId, interactedEvents, maxResults);
+        log.info("Found {} similar events for event {} excluding user {}'s interactions.", similarEvents.size(), eventId, userId);
+        return similarEvents;
     }
 
     @Transactional(readOnly = true)
-    public List<Recommendation> findInteractionsCount(List<Long> eventIds) {
-        return interactionRepository.findInteractionsCount(eventIds);
+    public List<Recommendation> getInteractionsCount(List<Long> eventIds) {
+        log.info("Finding interaction counts for {} events.", eventIds.size());
+
+        List<Recommendation> interactionCounts = interactionRepository.findInteractionsCount(eventIds);
+        log.info("Retrieved interaction counts for {} events.", interactionCounts.size());
+        return interactionCounts;
     }
 
     @Transactional(readOnly = true)
     public List<Recommendation> getUserPredictions(long userId, int maxResults) {
+        log.info("Generating top {} event predictions for user {}.", maxResults, userId);
 
         // Select candidates for suggestion
         List<Long> interactedEvents = interactionRepository.findInteractedEvents(userId);
         List<Long> recentlyInteractedEvents = interactionRepository.findRecentlyInteractedEvents(
-            userId, MAX_RECENT_EVENTS);
+            userId, properties.getMaxRecentEventsForPrediction());
+        log.debug("User {} recently interacted with {} events (max {}).", userId,
+            recentlyInteractedEvents.size(), properties.getMaxRecentEventsForPrediction());
+
         List<Long> similarEvents = similarityRepository.findTopSimilarToSet(
             recentlyInteractedEvents, maxResults);
+        log.debug("Found {} candidate events similar to user {}'s recently interacted events (based on {} events, max {} results).",
+            similarEvents.size(), userId, recentlyInteractedEvents.size(), maxResults);
+
+        if (similarEvents.isEmpty()) {
+            log.info("No similar events found as candidates for user {}. Returning empty predictions.", userId);
+            return List.of();
+        }
 
         // Find neighbours for candidates
         Map<Long, List<Recommendation>> neighbourEvents =
             similarityRepository.findNeighbourEventsFrom(
-            similarEvents, interactedEvents, MAX_NEIGHBOURS);
-        Map<Long, Double> neighbourUserWeights = interactionRepository.findInteractionWeights(
-            neighbourEvents.values().stream().flatMap(List::stream).map(Recommendation::getEventId)
-                .collect(Collectors.toSet()));
+            similarEvents, interactedEvents, properties.getMaxNeighboursForPrediction());
+        log.debug("Found neighbour events for {} candidate events with max {} neighbours each.",
+            similarEvents.size(), properties.getMaxNeighboursForPrediction());
+
+        // Collect all unique event IDs from neighbour events for fetching weights
+        List<Long> neighbourEventIds = neighbourEvents.values().stream()
+            .flatMap(List::stream)
+            .map(Recommendation::getEventId)
+            .collect(Collectors.toList());
+
+        Map<Long, Double> neighbourUserWeights = interactionRepository.findInteractionWeights(userId,
+            neighbourEventIds);
 
         // Calculate predicted scores based on neighbour scores
-        return similarEvents.stream().map(candidateEventId  -> {
+        List<Recommendation> predictions = similarEvents.stream().map(candidateEventId  -> {
             List<Recommendation> neighbours = neighbourEvents.getOrDefault(candidateEventId, List.of());
             if (neighbours.isEmpty()) {
+                log.debug("Candidate event {} has no neighbours. Predicted score will be 0.0.", candidateEventId);
                 return new Recommendation(candidateEventId, 0.0); // Nothing to base the prediction on
             }
 
@@ -65,7 +95,12 @@ public class RecommendationsService {
             double sumOfSimilarities = neighbours.stream().mapToDouble(Recommendation::getScore).sum();
             double predictedScore = (sumOfSimilarities == 0) ? 0.0 : weightedSumOfScores / sumOfSimilarities;
 
+            log.debug("Calculated predicted score for candidate event {}: {} (weightedSum: {}, sumSimilarities: {})",
+                candidateEventId , predictedScore, weightedSumOfScores, sumOfSimilarities);
             return new Recommendation(candidateEventId , predictedScore);
         }).toList();
+
+        log.info("Finished generating {} event predictions for user {}.", predictions.size(), userId);
+        return predictions;
     }
 }
