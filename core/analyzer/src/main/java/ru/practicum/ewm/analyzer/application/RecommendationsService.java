@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.ewm.analyzer.application.config.RecommendationProperties;
 import ru.practicum.ewm.analyzer.domain.EventSimilarityRepository;
 import ru.practicum.ewm.analyzer.domain.Recommendation;
 import ru.practicum.ewm.analyzer.domain.UserInteractionRepository;
@@ -16,10 +17,10 @@ import ru.practicum.ewm.analyzer.domain.UserInteractionRepository;
 @RequiredArgsConstructor
 public class RecommendationsService {
 
-    private static final int MAX_RECENT_EVENTS = 10;
-    private static final int MAX_NEIGHBOURS = 10;
     private final EventSimilarityRepository similarityRepository;
     private final UserInteractionRepository interactionRepository;
+
+    private final RecommendationProperties properties;
 
     @Transactional(readOnly = true)
     public List<Recommendation> findSimilarEvents(long eventId, long userId, int maxResults) {
