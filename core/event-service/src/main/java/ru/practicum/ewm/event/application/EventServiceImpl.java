@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.ewm.api.client.event.dto.EventDtoWithConfirmedRequests;
+import ru.practicum.ewm.api.client.event.dto.EventDtoWithRatingAndRequests;
 import ru.practicum.ewm.api.client.event.dto.EventFullDto;
 import ru.practicum.ewm.api.client.event.dto.EventInternalDto;
 import ru.practicum.ewm.api.client.event.dto.EventShortDto;
@@ -35,7 +34,7 @@ import ru.practicum.ewm.event.domain.EventRepository;
 import ru.practicum.ewm.event.domain.EventState;
 import ru.practicum.ewm.event.infrastructure.mapper.EventMapper;
 import ru.practicum.ewm.event.infrastructure.mapper.LocationMapper;
-import ru.practicum.ewm.stats.dto.ViewStatsDto;
+import ru.practicum.ewm.stats.client.AnalyzerClient;
 
 @Service
 @RequiredArgsConstructor
@@ -49,7 +48,7 @@ public class EventServiceImpl implements EventService {
     private final UserClient userClient;
     private final CategoryRepository categoryRepository;
     private final RequestClient requestClient;
-    private final StatsClient statsClient;
+    private final AnalyzerClient analyzerClient;
     private final DtoMapper dtoMapper;
 
     private static final long MIN_HOURS_BEFORE_PUBLICATION_FOR_ADMIN = 1;
@@ -64,12 +63,9 @@ public class EventServiceImpl implements EventService {
             return Collections.emptyList();
         }
 
-        Map<Long, Long> viewsMap = getViewsForEvents(foundEvents);
-
         List<EventShortDto> eventDtos = eventMapper.toEventShortDtoList(foundEvents);
-        eventDtos.forEach(dto -> dto.setViews(viewsMap.getOrDefault(dto.getId(), 0L)));
 
-        enrichEventsWithConfirmedRequests(eventDtos);
+        enrichEvents(eventDtos);
 
         if (Boolean.TRUE.equals(params.getOnlyAvailable())) {
             Map<Long, Integer> participantLimitMap = foundEvents.stream()
@@ -83,8 +79,8 @@ public class EventServiceImpl implements EventService {
                 .collect(Collectors.toList());
         }
 
-        if (params.getSort() != null && params.getSort().equalsIgnoreCase("VIEWS")) {
-            eventDtos.sort(Comparator.comparing(EventShortDto::getViews).reversed());
+        if (params.getSort() != null && params.getSort().equalsIgnoreCase("RATING")) {
+            eventDtos.sort(Comparator.comparing(EventShortDto::getRating).reversed());
         }
 
         log.info("Public search prepared {} DTOs after enrichment and filtering.", eventDtos.size());
@@ -102,13 +98,10 @@ public class EventServiceImpl implements EventService {
 
         EventFullDto resultDto = eventMapper.toEventFullDto(event);
 
-        long views = getViewsForEvents(List.of(event)).getOrDefault(eventId, 0L);
-        resultDto.setViews(views);
+        enrichEvents(List.of(resultDto));
 
-        enrichEventsWithConfirmedRequests(List.of(resultDto));
-
-        log.info("Public: Found event id={} with title='{}', views={}, confirmedRequests={}",
-            eventId, resultDto.getTitle(), resultDto.getViews(), resultDto.getConfirmedRequests());
+        log.info("Public: Found event id={} with title='{}', rating={}, confirmedRequests={}",
+            eventId, resultDto.getTitle(), resultDto.getRating(), resultDto.getConfirmedRequests());
 
         return resultDto;
     }
@@ -127,11 +120,8 @@ public class EventServiceImpl implements EventService {
 
         List<EventFullDto> result = eventMapper.toEventFullDtoList(foundEvents);
 
-        Map<Long, Long> viewsData = getViewsForEvents(foundEvents);
-        result.forEach(dto -> dto.setViews(viewsData.get(dto.getId())));
-
         log.debug("Admin search found {} events", result.size());
-        return enrichEventsWithConfirmedRequests(result);
+        return enrichEvents(result);
     }
 
     @Override
@@ -200,7 +190,7 @@ public class EventServiceImpl implements EventService {
 
         Event updatedEvent = eventRepository.save(event);
         log.info("Admin: Event id={} moderated successfully. New state: {}", eventId, updatedEvent.getState());
-        return enrichEventsWithConfirmedRequests(List.of(eventMapper.toEventFullDto(updatedEvent))).getFirst();
+        return enrichEvents(List.of(eventMapper.toEventFullDto(updatedEvent))).getFirst();
     }
 
     @Override
@@ -222,7 +212,7 @@ public class EventServiceImpl implements EventService {
 
         List<EventShortDto> result = eventMapper.toEventShortDtoList(foundEvents);
         log.debug("Found {} events for owner id: {}", result.size(), userId);
-        return enrichEventsWithConfirmedRequests(result);
+        return enrichEvents(result);
     }
 
     @Override
@@ -285,7 +275,7 @@ public class EventServiceImpl implements EventService {
 
         Event updatedEvent = eventRepository.save(event);
         log.info("User id={}: Event id={} updated successfully.", userId, eventId);
-        return enrichEventsWithConfirmedRequests(List.of(eventMapper.toEventFullDto(updatedEvent))).getFirst();
+        return enrichEvents(List.of(eventMapper.toEventFullDto(updatedEvent))).getFirst();
     }
 
     @Override
@@ -301,7 +291,7 @@ public class EventServiceImpl implements EventService {
 
         EventFullDto result = eventMapper.toEventFullDto(event);
         log.debug("Found event: {}", result);
-        return enrichEventsWithConfirmedRequests(List.of(result)).getFirst();
+        return enrichEvents(List.of(result)).getFirst();
     }
 
     @Override
@@ -323,7 +313,7 @@ public class EventServiceImpl implements EventService {
         event.setInitiatorId(userId);
         EventFullDto savedEvent = eventMapper.toEventFullDto(eventRepository.save(event));
         savedEvent.setInitiator(dtoMapper.toUserShortDto(initiator));
-        return enrichEventsWithConfirmedRequests(List.of(savedEvent)).getFirst();
+        return enrichEvents(List.of(savedEvent)).getFirst();
     }
 
     public EventInternalDto getEventById(Long eventId) {
@@ -336,52 +326,14 @@ public class EventServiceImpl implements EventService {
             .orElseThrow(() -> new EntityNotFoundException("Event", "Id", eventId)));
     }
 
-    private Map<Long, Long> getViewsForEvents(List<Event> events) {
-        if (events == null || events.isEmpty()) {
-            return Collections.emptyMap();
-        }
-        List<String> uris = events.stream()
-            .map(event -> "/events/" + event.getId())
-            .distinct()
-            .collect(Collectors.toList());
-
-        LocalDateTime earliestCreation = events.stream()
-            .map(Event::getCreatedOn)
-            .min(LocalDateTime::compareTo)
-            .orElse(LocalDateTime.of(1970, 1, 1, 0, 0));
-
-        Map<Long, Long> viewsMap = new HashMap<>();
-        try {
-            List<ViewStatsDto> stats = statsClient.getStats(
-                earliestCreation,
-                LocalDateTime.now(),
-                uris,
-                true // Уникальные просмотры
-            );
-            if (stats != null) {
-                for (ViewStatsDto stat : stats) {
-                    try {
-                        Long eventId = Long.parseLong(stat.getUri().substring("/events/".length()));
-                        viewsMap.put(eventId, stat.getHits());
-                    } catch (NumberFormatException | IndexOutOfBoundsException e) {
-                        log.warn("Could not parse eventId from URI {} from stats service", stat.getUri());
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.error("Failed to retrieve views for multiple events. Error: {}", e.getMessage());
-        }
-        return viewsMap;
-    }
-
     /**
-     * Enriches a list of event DTOs with the count of confirmed participation requests.
+     * Enriches a list of event DTOs with the count of confirmed participation requests and their rating values.
      *
-     * @param dtos A list of DTOs that extend a base type with getId() and setConfirmedRequests().
+     * @param dtos A list of DTOs that extend a base type with getId(), setConfirmedRequests(), and setRating().
      * @param <T> The specific type of the DTO (e.g., EventFullDto, EventShortDto).
-     * @return The same list of DTOs, now with the confirmedRequests field populated.
+     * @return The same list of DTOs, now with the confirmedRequests and rating fields populated.
      */
-    private <T extends EventDtoWithConfirmedRequests> List<T> enrichEventsWithConfirmedRequests(List<T> dtos) {
+    private <T extends EventDtoWithRatingAndRequests> List<T> enrichEvents(List<T> dtos) {
         if (dtos == null || dtos.isEmpty()) {
             return Collections.emptyList();
         }
@@ -391,10 +343,12 @@ public class EventServiceImpl implements EventService {
             .collect(Collectors.toSet());
 
         Map<Long, Long> confirmedCountsMap = requestClient.getConfirmedRequestCounts(eventIds);
+        Map<Long, Double> ratingsMap = analyzerClient.getInteractionsCount(eventIds);
 
-        dtos.forEach(dto ->
-            dto.setConfirmedRequests(confirmedCountsMap.getOrDefault(dto.getId(), 0L))
-        );
+        dtos.forEach(dto -> {
+            dto.setConfirmedRequests(confirmedCountsMap.getOrDefault(dto.getId(), 0L));
+            dto.setRating(ratingsMap.getOrDefault(dto.getId(), 0.0));
+        });
 
         return dtos;
     }

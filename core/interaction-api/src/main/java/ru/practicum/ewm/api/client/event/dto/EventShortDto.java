@@ -17,7 +17,7 @@ import ru.practicum.ewm.api.client.user.dto.UserShortDto;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class EventShortDto implements EventDtoWithConfirmedRequests {
+public class EventShortDto implements EventDtoWithRatingAndRequests {
     Long id;
     String annotation;
     CategoryDto category;
