@@ -130,7 +130,7 @@ public class CompilationServiceImpl implements CompilationService {
         if (compilationDto.getEvents() != null) {
             for (EventShortDto eventDto : compilationDto.getEvents()) {
                 eventDto.setConfirmedRequests(0L);
-                eventDto.setViews(0L);
+                eventDto.setRating(0.0);
             }
         }
         return compilationDto;

@@ -37,6 +37,6 @@ public class EventFullDto implements EventDtoWithConfirmedRequests {
     boolean requestModeration;
     EventState state;
     String title;
-    Long views;
+    Double rating;
     boolean commentsEnabled;
 }

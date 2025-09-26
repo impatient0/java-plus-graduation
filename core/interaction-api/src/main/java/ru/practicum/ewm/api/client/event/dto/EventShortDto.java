@@ -27,5 +27,5 @@ public class EventShortDto implements EventDtoWithConfirmedRequests {
     UserShortDto initiator;
     Boolean paid;
     String title;
-    Long views;
+    Double rating;
 }
