@@ -58,7 +58,7 @@ services:
   kafka:
     image: confluentinc/confluent-local:7.4.10
     hostname: kafka
-    container_name: kafka
+    container_name: ewm-kafka
     ports:
       - "9092:9092"
     restart: unless-stopped
@@ -123,9 +123,12 @@ services:
     build: core/collector
     container_name: ewm-collector-service
     depends_on:
-      discovery-server: { condition: service_healthy }
-      config-server: { condition: service_healthy }
-      kafka: { condition: service_healthy }
+      discovery-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
     restart: unless-stopped
     environment:
       EUREKA_URI: http://discovery-server:8761/eureka/
@@ -135,9 +138,12 @@ services:
     build: core/aggregator
     container_name: ewm-aggregator-service
     depends_on:
-      discovery-server: { condition: service_healthy }
-      config-server: { condition: service_healthy }
-      kafka: { condition: service_healthy }
+      discovery-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
     restart: unless-stopped
     environment:
       EUREKA_URI: http://discovery-server:8761/eureka/
@@ -147,10 +153,14 @@ services:
     build: core/analyzer
     container_name: ewm-analyzer-service
     depends_on:
-      discovery-server: { condition: service_healthy }
-      config-server: { condition: service_healthy }
-      ewm-db: { condition: service_healthy }
-      kafka: { condition: service_healthy }
+      discovery-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      ewm-db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
     restart: unless-stopped
     environment:
       EUREKA_URI: http://discovery-server:8761/eureka/
