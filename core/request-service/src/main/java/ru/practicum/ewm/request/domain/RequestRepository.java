@@ -21,6 +21,8 @@ public interface RequestRepository {
 
     boolean existsByEventIdAndRequesterId(Long eventId, Long requesterId);
 
+    boolean existsByRequesterIdAndEventIdAndStatus(Long eventId, Long requesterId, RequestStatus status);
+
     int countByEventIdAndStatus(Long eventId, RequestStatus status);
 
     boolean doAllRequestsBelongToEvent(List<Long> requestIds, Long eventId);

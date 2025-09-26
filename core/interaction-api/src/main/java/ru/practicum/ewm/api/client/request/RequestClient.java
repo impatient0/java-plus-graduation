@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.Set;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(name = "request-service", path = "/internal/requests", configuration = RequestClientConfiguration.class)
@@ -16,4 +18,7 @@ public interface RequestClient {
      */
     @GetMapping("/confirmed-counts")
     Map<Long, Long> getConfirmedRequestCounts(@RequestParam("eventIds") Set<Long> eventIds);
+
+    @RequestMapping(method = RequestMethod.HEAD, value = "/participation")
+    void checkUserParticipation(@RequestParam("userId") Long userId, @RequestParam("eventId") Long eventId);
 }

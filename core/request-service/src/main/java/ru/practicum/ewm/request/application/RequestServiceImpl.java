@@ -188,4 +188,10 @@ public class RequestServiceImpl implements RequestService {
         return newRequest;
     }
 
+    public void checkUserParticipation(long userId, long eventId) {
+        if (!requestRepository.existsByRequesterIdAndEventIdAndStatus(userId, eventId, RequestStatus.CONFIRMED)) {
+            throw new EntityNotFoundException("User " + userId + " has not participated in event " + eventId);
+        }
+    }
+
 }

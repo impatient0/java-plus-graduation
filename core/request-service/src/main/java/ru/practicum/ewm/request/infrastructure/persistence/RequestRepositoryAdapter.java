@@ -66,6 +66,11 @@ public class RequestRepositoryAdapter implements RequestRepository {
     }
 
     @Override
+    public boolean existsByRequesterIdAndEventIdAndStatus(Long eventId, Long requesterId, RequestStatus status) {
+        return jpaRequestRepository.existsByRequesterIdAndEventIdAndStatus(requesterId, eventId, status);
+    }
+
+    @Override
     public int countByEventIdAndStatus(Long eventId, RequestStatus status) {
         return jpaRequestRepository.countByEventIdAndStatus(eventId, status);
     }

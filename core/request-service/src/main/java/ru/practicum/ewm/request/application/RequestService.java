@@ -23,4 +23,6 @@ public interface RequestService {
 
     Map<Long, Long> getConfirmedRequestCounts(Set<Long> eventIds);
 
+    void checkUserParticipation(long userId, long eventId);
+
 }
