@@ -19,7 +19,8 @@ import ru.practicum.ewm.api.client.event.dto.EventFullDto;
 import ru.practicum.ewm.api.client.event.dto.EventShortDto;
 import ru.practicum.ewm.event.application.EventService;
 import ru.practicum.ewm.event.application.params.PublicEventSearchParams;
-import ru.practicum.ewm.stats.client.aop.LogStatsHit;
+import ru.practicum.ewm.stats.client.aop.ActionType;
+import ru.practicum.ewm.stats.client.aop.LogUserAction;
 
 @RestController
 @RequestMapping("/events")
@@ -32,7 +33,6 @@ public class PublicEventController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    @LogStatsHit
     public List<EventShortDto> getEvents(
             @Valid PublicEventSearchParams params,
             @RequestParam(name = "from", defaultValue = "0") @PositiveOrZero int from,
@@ -52,7 +52,7 @@ public class PublicEventController {
 
     @GetMapping("/{eventId}")
     @ResponseStatus(HttpStatus.OK)
-    @LogStatsHit
+    @LogUserAction(value = ActionType.VIEW)
     public EventFullDto getEventById(
             @PathVariable @Positive Long eventId,
             @RequestHeader(name = "X-Real-IP", required = false) String ipAddress) {
@@ -60,5 +60,12 @@ public class PublicEventController {
         EventFullDto event = eventService.getEventByIdPublic(eventId);
         log.info("Public: Found event: {}", event);
         return event;
+    }
+
+    @GetMapping("/recommendations")
+    @ResponseStatus(HttpStatus.OK)
+    public List<EventShortDto> getRecommendations(@RequestHeader("X-EWM-USER-ID") long userId,
+        @RequestParam(name = "maxCount", defaultValue = "10") Integer maxCount) {
+        return eventService.getRecommendations(userId, maxCount);
     }
 }

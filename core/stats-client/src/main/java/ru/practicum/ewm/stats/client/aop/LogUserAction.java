@@ -17,19 +17,21 @@ import java.lang.annotation.Target;
  * header is present.
  *
  * <p><b>Usage Example:</b></p>
- * <pre><code>
- * {@literal @}GetMapping("/{eventId}")
- * {@literal @}LogUserAction(value = ActionType.VIEW, eventId = "#eventId")
+ * <pre>
+ * {@code
+ * @GetMapping("/{eventId}")
+ * @LogUserAction(value = ActionType.VIEW, eventId = "#eventId")
  * public EventFullDto getEvent(@PathVariable Long eventId, @RequestHeader("X-EWM-USER-ID") long userId) {
  *     // ...
  * }
  *
- * {@literal @}PostMapping
- * {@literal @}LogUserAction(value = ActionType.REGISTER, eventId = "#request.eventId")
+ * @PostMapping
+ * @LogUserAction(value = ActionType.REGISTER, eventId = "#request.eventId")
  * public ParticipationRequestDto createRequest(@RequestBody NewRequestDto request, ...) {
  *     // ...
  * }
- * </code></pre>
+ * }
+ * </pre>
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

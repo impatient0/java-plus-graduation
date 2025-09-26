@@ -24,6 +24,7 @@ import ru.practicum.ewm.api.client.user.UserClient;
 import ru.practicum.ewm.api.client.user.dto.UserDto;
 import ru.practicum.ewm.api.error.BusinessRuleViolationException;
 import ru.practicum.ewm.api.error.EntityNotFoundException;
+import ru.practicum.ewm.api.error.IllegalLikeException;
 import ru.practicum.ewm.api.utility.DtoMapper;
 import ru.practicum.ewm.event.application.params.AdminEventSearchParams;
 import ru.practicum.ewm.event.application.params.PublicEventSearchParams;
@@ -314,6 +315,32 @@ public class EventServiceImpl implements EventService {
         EventFullDto savedEvent = eventMapper.toEventFullDto(eventRepository.save(event));
         savedEvent.setInitiator(dtoMapper.toUserShortDto(initiator));
         return enrichEvents(List.of(savedEvent)).getFirst();
+    }
+
+    @Override
+    public void addLike(Long userId, Long eventId) {
+        eventRepository.findByIdAndState(eventId, EventState.PUBLISHED).orElseThrow(
+            () -> new EntityNotFoundException(
+                "Event with id=" + eventId + " not found or is not published."));
+
+        try {
+            requestClient.checkUserParticipation(userId, eventId);
+        } catch (EntityNotFoundException e) {
+            throw new IllegalLikeException("User has not participated in this event and cannot like it.");
+        }
+    }
+
+    @Override
+    public List<EventShortDto> getRecommendations(Long userId, Integer maxCount) {
+        Map<Long, Double> recommendationsMap = analyzerClient.getRecommendationsForUser(userId, maxCount);
+        if (recommendationsMap.isEmpty()) {
+            log.warn("No recommendations found for user id={}", userId);
+            return List.of();
+        }
+
+        List<Event> recommendedEvents = eventRepository.findAllByIdIn(recommendationsMap.keySet());
+        log.info("Found {} recommended events for user id={}", recommendedEvents.size(), userId);
+        return enrichEvents(eventMapper.toEventShortDtoList(recommendedEvents));
     }
 
     public EventInternalDto getEventById(Long eventId) {

@@ -13,6 +13,7 @@ import ru.practicum.ewm.api.error.BusinessRuleViolationException;
 import ru.practicum.ewm.api.error.EntityAlreadyExistsException;
 import ru.practicum.ewm.api.error.EntityDeletedException;
 import ru.practicum.ewm.api.error.EntityNotFoundException;
+import ru.practicum.ewm.api.error.IllegalLikeException;
 
 @RestControllerAdvice
 @Slf4j
@@ -53,7 +54,25 @@ public class GlobalExceptionHandler extends BaseExceptionHandler {
     }
 
     /**
-     * Handles violations of business logic within the event service.
+     * Handles the specific business rule violation of a user trying to like an event
+     * they have not participated in.
+     * <br>
+     * Maps to HTTP 400 Bad Request.
+     */
+    @ExceptionHandler(IllegalLikeException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleIllegalLikeException(IllegalLikeException e) {
+        log.warn("Illegal like attempt: {}", e.getMessage());
+        return ApiError.builder()
+            .status(HttpStatus.BAD_REQUEST)
+            .reason("The conditions for liking the event are not met.")
+            .message(e.getMessage())
+            .timestamp(LocalDateTime.now())
+            .build();
+    }
+
+    /**
+     * Handles generic violations of business logic within the event service.
      * <br>
      * Maps to HTTP 409 Conflict.
      */
