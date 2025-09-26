@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.ewm.api.client.request.dto.ParticipationRequestDto;
 import ru.practicum.ewm.request.application.RequestService;
+import ru.practicum.ewm.stats.client.aop.ActionType;
+import ru.practicum.ewm.stats.client.aop.LogUserAction;
 
 @RestController
 @RequestMapping("/users/{userId}/requests")
@@ -28,6 +30,7 @@ public class UserRequestController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @LogUserAction(value = ActionType.REGISTER)
     public ParticipationRequestDto createRequest(
             @PathVariable @Positive Long userId,
             @RequestParam @Positive Long eventId) {
