@@ -1,13 +1,8 @@
 package ru.practicum.ewm.stats.client;
 
 import io.grpc.stub.StreamObserver;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import net.devh.boot.grpc.client.inject.GrpcClient;
-import org.springframework.stereotype.Component;
-import ru.practicum.ewm.stats.grpc.*;
-
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -15,6 +10,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import net.devh.boot.grpc.client.inject.GrpcClient;
+import org.springframework.stereotype.Component;
+import ru.practicum.ewm.stats.grpc.InteractionsCountRequestProto;
+import ru.practicum.ewm.stats.grpc.RecommendationsControllerGrpc;
+import ru.practicum.ewm.stats.grpc.RecommendedEventProto;
+import ru.practicum.ewm.stats.grpc.SimilarEventsRequestProto;
+import ru.practicum.ewm.stats.grpc.UserPredictionsRequestProto;
 
 @Component
 @Slf4j
@@ -23,7 +26,7 @@ public class AnalyzerClient {
     @GrpcClient("analyzer")
     private RecommendationsControllerGrpc.RecommendationsControllerStub asyncStub;
 
-    public Map<Long, Double> getInteractionsCount(List<Long> eventIds) {
+    public Map<Long, Double> getInteractionsCount(Collection<Long> eventIds) {
         log.debug("Requesting interaction counts for {} events", eventIds.size());
         InteractionsCountRequestProto request = InteractionsCountRequestProto.newBuilder()
             .addAllEventIds(eventIds)

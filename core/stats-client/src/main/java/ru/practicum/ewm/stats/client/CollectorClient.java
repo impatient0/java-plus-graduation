@@ -2,7 +2,6 @@ package ru.practicum.ewm.stats.client;
 
 import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Component;

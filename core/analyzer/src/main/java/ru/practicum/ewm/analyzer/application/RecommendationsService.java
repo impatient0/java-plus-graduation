@@ -1,5 +1,6 @@
 package ru.practicum.ewm.analyzer.application;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -35,7 +36,7 @@ public class RecommendationsService {
     }
 
     @Transactional(readOnly = true)
-    public List<Recommendation> getInteractionsCount(List<Long> eventIds) {
+    public List<Recommendation> getInteractionsCount(Collection<Long> eventIds) {
         log.info("Finding interaction counts for {} events.", eventIds.size());
 
         List<Recommendation> interactionCounts = interactionRepository.findInteractionsCount(eventIds);
