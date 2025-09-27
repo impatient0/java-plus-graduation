@@ -57,6 +57,10 @@ public class SimilarityCalculationService {
 
             // Update contributions and recalculate similarities
             Map<Long, Double> userEventWeights = userEventWeightsRepo.findWeightsByUserId(userId);
+            if (userEventWeights.size() <= 1) {
+                log.warn("User {} has interacted with only one event ({}). No similarity calculation needed.", userId, eventId);
+                return;
+            }
             log.debug("Retrieved all event weights for user {}: {}", userId, userEventWeights.keySet());
 
             // Store deltas for affected events
@@ -74,9 +78,7 @@ public class SimilarityCalculationService {
                 double oldMin = Math.min(oldWeight, otherEventWeight);
                 double newMin = Math.min(newWeight, otherEventWeight);
 
-                if (newMin > oldMin) {
-                    minWeightDeltas.put(otherEventId, newMin - oldMin);
-                }
+                minWeightDeltas.put(otherEventId, Math.max(newMin - oldMin, 0.0)); // Add zero-deltas for unchanged events
             }
 
             // Update affected events and retrieve their weights
