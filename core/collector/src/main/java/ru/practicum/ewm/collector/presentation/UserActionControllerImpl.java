@@ -9,7 +9,6 @@ import ru.practicum.ewm.collector.infrastructure.kafka.UserActionProducer;
 import ru.practicum.ewm.collector.infrastructure.mapper.UserActionMapper;
 import ru.practicum.ewm.stats.grpc.UserActionControllerGrpc;
 import ru.practicum.ewm.stats.grpc.UserActionProto;
-import ru.practicum.ewm.stats.kafka.UserActionAvro;
 
 @GrpcService
 @Slf4j
@@ -23,9 +22,7 @@ public class UserActionControllerImpl extends UserActionControllerGrpc.UserActio
     public void collectUserAction(UserActionProto request, StreamObserver<Empty> responseObserver) {
         log.info("Received user action via gRPC: {}", request);
 
-        UserActionAvro avroMessage = mapper.toAvro(request);
-
-        producer.sendUserAction(avroMessage);
+        producer.sendUserAction(mapper.toAvro(request));
 
         responseObserver.onNext(Empty.getDefaultInstance());
         responseObserver.onCompleted();

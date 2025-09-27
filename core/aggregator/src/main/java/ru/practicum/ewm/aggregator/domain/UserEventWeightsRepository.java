@@ -1,7 +1,6 @@
 package ru.practicum.ewm.aggregator.domain;
 
 import java.util.Map;
-import java.util.Optional;
 
 public interface UserEventWeightsRepository {
 
