@@ -1,7 +1,7 @@
 recommendations:
   action-weights:
-    VIEW: 1.0
-    REGISTER: 3.0
-    LIKE: 5.0
+    VIEW: 0.4
+    REGISTER: 0.8
+    LIKE: 1.0
   max-recent-events-for-prediction: 10
   max-neighbours-for-prediction: 10
