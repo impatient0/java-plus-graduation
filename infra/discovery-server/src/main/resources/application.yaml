@@ -10,9 +10,6 @@ eureka:
     fetchRegistry: false
     serviceUrl:
       defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
-    lease:
-      durationInSeconds: 30
-      renewalIntervalInSeconds: 10
 
     server:
       enableSelfPreservation: false
