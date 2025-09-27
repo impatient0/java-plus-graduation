@@ -26,13 +26,13 @@ eureka:
   instance:
     health-check-url-path: /actuator/health/readiness
     health-check-url-enabled: true
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 15
 
   client:
     healthcheck:
-      enabled: true
+      enabled: false
     registry-fetch-interval-seconds: 5
-    lease:
-      durationInSeconds: 30
-      renewalIntervalInSeconds: 10
     registration:
-      initialDelayPeriod: 1000
+      initialDelayPeriod: 500

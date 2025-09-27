@@ -2,7 +2,7 @@ spring:
   application:
     name: request-service
   profiles:
-    active: postgres
+    active: postgres, grpc-client
   config:
     import: "configserver:"
   cloud:
@@ -22,4 +22,3 @@ eureka:
       defaultZone: ${EUREKA_URI:http://localhost:8761/eureka/}
   instance:
     instance-id: "${spring.application.name}:${random.value}"
-    leaseRenewalIntervalInSeconds: 10
