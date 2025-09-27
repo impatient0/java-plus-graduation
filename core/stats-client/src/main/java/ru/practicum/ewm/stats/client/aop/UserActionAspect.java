@@ -93,8 +93,8 @@ public class UserActionAspect {
         try {
             return ActionTypeProto.valueOf("ACTION_" + nativeType.name());
         } catch (IllegalArgumentException e) {
-            log.error("Unknown ActionType '{}'. Mapping to ACTION_UNKNOWN.", nativeType);
-            return ActionTypeProto.ACTION_UNKNOWN;
+            log.error("Unknown ActionType '{}'. Mapping to UNRECOGNIZED.", nativeType);
+            return ActionTypeProto.UNRECOGNIZED;
         }
     }
 }
